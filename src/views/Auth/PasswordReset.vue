@@ -36,44 +36,39 @@
               <h1
                 class="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md"
               >
-                Reset Password
+                Reset Your Password
               </h1>
               <p class="text-sm text-gray-500 dark:text-gray-400">
-                Enter your email address to receive instructions.
+                Enter your email address to receive a password reset link.
               </p>
             </div>
             <div>
               <form @submit.prevent="handleSubmit">
                 <div class="space-y-5">
-                   <!-- Success Message -->
-                   <div v-if="successMessage" class="p-3 text-sm text-green-700 bg-green-100 border border-green-300 rounded-lg dark:bg-green-900/30 dark:border-green-700 dark:text-green-400">
-                     {{ successMessage }}
+                   <!-- Message Placeholder -->
+                   <div v-if="message" class="p-3 text-sm rounded-lg" :class="isError ? 'text-red-700 bg-red-100 border border-red-300 dark:bg-red-900/30 dark:border-red-700 dark:text-red-400' : 'text-green-700 bg-green-100 border border-green-300 dark:bg-green-900/30 dark:border-green-700 dark:text-green-400'">
+                     {{ message }}
                    </div>
-                  <!-- Email -->
-                  <div>
-                    <label for="email" class="form-label">
-                      Email Address<span class="text-error-500">*</span>
-                    </label>
-                    <input
-                      v-model="email"
-                      type="email"
-                      id="email"
-                      name="email"
-                      placeholder="you@example.com"
-                      required
-                      class="form-input"
-                    />
-                  </div>
+                  <!-- Email Input -->
+                  <BaseInput
+                    v-model="email"
+                    label="Email"
+                    type="email"
+                    placeholder="your.email@example.com"
+                    required
+                    inputId="reset-email"
+                    :disabled="isLoading || message && !isError" 
+                  />
 
                   <!-- Button -->
                   <div>
                     <button
                       type="submit"
                       class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                      :disabled="isLoading"
+                      :disabled="isLoading || message && !isError"
                     >
-                      <span v-if="isLoading">Sending...</span>
-                      <span v-else>Send Reset Instructions</span>
+                      <span v-if="isLoading">Sending Link...</span>
+                      <span v-else>Send Reset Link</span>
                     </button>
                   </div>
                 </div>
@@ -91,24 +86,35 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
-import AuthCardLayout from '@/components/AuthCardLayout.vue' // Reusing this layout part
+import BaseInput from '@/components/common/BaseInput.vue'
 
 const email = ref('')
 const isLoading = ref(false)
-const successMessage = ref<string | null>(null)
+const message = ref<string | null>(null)
+const isError = ref(false)
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   isLoading.value = true
-  successMessage.value = null // Clear previous message
-  console.log('Password reset requested for:', email.value)
+  message.value = null
+  isError.value = false
+  console.log('Password Reset Request:', email.value)
+  try {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500))
 
-  // Mock sending instructions
-  setTimeout(() => {
+    // Mock success
+    message.value = `Password reset link sent successfully to ${email.value}. Please check your inbox.`
+    isError.value = false
+    // Keep loading false, disable form maybe
+    // Don't reset email field so user sees where it was sent
+
+  } catch (error) {
+    console.error("Password Reset error:", error)
+    message.value = 'Failed to send reset link. Please try again.'
+    isError.value = true
+  } finally {
     isLoading.value = false
-    successMessage.value = `If an account exists for ${email.value}, you will receive password reset instructions.`
-    // Clear email field after mock success?
-    // email.value = ''
-  }, 1500)
+  }
 }
 </script>
 

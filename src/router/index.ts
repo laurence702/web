@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+
 import AdminLayout from '@/components/layout/AdminLayout.vue' // Import the layout
+import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -228,6 +229,20 @@ const router = createRouter({
         title: 'Reset Password',
       },
     },
+    // --- Rider Auth Routes ---
+    {
+      path: '/rider/signin',
+      name: 'RiderSignin',
+      component: () => import('../views/Auth/RiderSignin.vue'),
+      meta: { title: 'Rider Signin' }
+    },
+    {
+      path: '/rider/signup',
+      name: 'RiderSignup',
+      component: () => import('../views/Auth/RiderSignup.vue'),
+      meta: { title: 'Rider Signup' }
+    },
+    // --- END Rider Auth Routes ---
     {
       path: '/error-404',
       name: '404 Error',

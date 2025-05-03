@@ -19,6 +19,7 @@ coverage
 
 
 guide/*
+.env
 
 # Editor directories and files
 .vscode/*

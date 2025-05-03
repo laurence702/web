@@ -1,0 +1,26 @@
+[
+  {
+    "id": "prod_lpg_6",
+    "name": "LPG",
+    "unit": "6kg",
+    "pricePerUnit": 3000,
+    "minPurchase": 1,
+    "maxPurchase": 5
+  },
+  {
+    "id": "prod_lpg_12",
+    "name": "LPG",
+    "unit": "12.5kg",
+    "pricePerUnit": 6000,
+    "minPurchase": 1,
+    "maxPurchase": 3
+  },
+  {
+    "id": "prod_pms",
+    "name": "PMS (Fuel)",
+    "unit": "litre",
+    "pricePerUnit": 800,
+    "minPurchase": 5,
+    "maxPurchase": 100
+  }
+] 

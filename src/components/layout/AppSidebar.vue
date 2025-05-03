@@ -314,6 +314,11 @@ const menuGroups = [
         path: "/admin/registration-approval",
       },
       {
+        icon: UserCircleIcon,
+        name: "Admin Management",
+        path: "/super-admin/admins",
+      },
+      {
         icon: TableIcon,
         name: "Stats & Reports",
         path: "/admin/stats-reports",

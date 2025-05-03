@@ -17,6 +17,9 @@ coverage
 /cypress/videos/
 /cypress/screenshots/
 
+
+PROJECT_PLAN.MD
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

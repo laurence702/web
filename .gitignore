@@ -18,7 +18,7 @@ coverage
 /cypress/screenshots/
 
 
-PROJECT_PLAN.MD
+guide/PROJECT_PLAN.MD
 
 # Editor directories and files
 .vscode/*

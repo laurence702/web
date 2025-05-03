@@ -14,7 +14,6 @@
         :loading="loading"
         :totalItems="admins.length"
         :showPagination="true"
-        <!-- Removed v-model:currentPage="currentPage" -->
       >
       <!-- Assuming client-side data for now -->
       <!-- Custom cell rendering -->
@@ -178,10 +177,10 @@ const unbanAdmin = (id: string) => {
 
 <style scoped>
 /* Add simple button styling if not globally available */
-.btn {
+/* .btn {
     @apply px-4 py-2 rounded-md font-medium text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800;
 }
 .btn-primary {
     @apply bg-brand-500 text-white hover:bg-brand-600 focus:ring-brand-500;
-}
+} */
 </style>

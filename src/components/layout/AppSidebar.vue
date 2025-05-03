@@ -341,7 +341,7 @@ const menuGroups = [
       {
         icon: TableIcon,
         name: "Stats & Reports",
-        path: "/admin/stats-reports",
+        path: "/super-admin/stats-reports",
       },
     ],
   },

@@ -92,7 +92,7 @@
                     {{ product.name }}
                   </p>
                   <span class="text-gray-500 text-theme-xs dark:text-gray-400"
-                    >{{ product.variants }} Variants</span
+                    >{{ product.units }} units</span
                   >
                 </div>
               </div>
@@ -125,49 +125,41 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 
 const products = ref([
   {
-    name: 'Macbook pro 13"',
-    variants: 2,
-    image: '/images/product/product-01.jpg',
-    category: 'Laptop',
-    price: '$2399.00',
+    name: 'Compressed Natural Gas',
+    units: 12.5,
+    image: '/images/product/LPG.png',
+    category: 'Gas',
+    price: '#2399.00',
     status: 'Delivered',
   },
   {
-    name: 'Apple Watch Ultra',
-    variants: 1,
-    image: '/images/product/product-02.jpg',
-    category: 'Watch',
-    price: '$879.00',
+    name: 'Compressed Natural Gas',
+    units: 25,
+    image: '/images/product/CNG2.png',
+    category: 'Gas',
+    price: '#879.00',
     status: 'Pending',
   },
   {
-    name: 'iPhone 15 Pro Max',
-    variants: 2,
-    image: '/images/product/product-03.jpg',
-    category: 'SmartPhone',
-    price: '$1869.00',
+    name: 'Premium Motor Spirit',
+    units: 1,
+    image: '/images/product/PMS.png',
+    category: 'Liquid',
+    price: '#1869.00',
     status: 'Delivered',
   },
   {
-    name: 'iPad Pro 3rd Gen',
-    variants: 2,
-    image: '/images/product/product-04.jpg',
-    category: 'Electronics',
-    price: '$1699.00',
+    name: 'Liquefied Petroleum Gas',
+    units: 1,
+    image: '/images/product/LPG.png',
+    category: 'Gas',
+    price: '#1699.00',
     status: 'Canceled',
-  },
-  {
-    name: 'Airpods Pro 2nd Gen',
-    variants: 1,
-    image: '/images/product/product-05.jpg',
-    category: 'Accessories',
-    price: '$240.00',
-    status: 'Delivered',
   },
 ])
 </script>

@@ -81,19 +81,4 @@ const formatCurrency = (value: number | unknown): string => {
   return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(value);
 };
 
-</script>
-
-<style scoped>
-.stats-card {
-    @apply bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700;
-}
-.stats-title {
-    @apply text-sm font-medium text-gray-500 dark:text-gray-400 mb-1;
-}
-.stats-value {
-    @apply text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white;
-}
-.stats-description {
-    @apply text-xs text-gray-500 dark:text-gray-400 mt-1;
-}
-</style> 
+</script> 

@@ -111,22 +111,3 @@ const viewTransaction = (id: string) => {
 }
 
 </script>
-
-<style scoped>
-/* Scoped styles, including basic button styles if needed */
-.form-input-sm {
-    @apply h-9 text-sm;
-}
-.form-input {
-  @apply block w-full rounded-md border border-gray-300 bg-transparent px-3 py-1.5 text-sm text-gray-800 shadow-sm placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-1 focus:ring-brand-500/50 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 disabled:cursor-not-allowed disabled:opacity-50 dark:disabled:bg-gray-800;
-}
-.btn {
-    @apply px-3 py-1.5 rounded-md font-medium text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800;
-}
-.btn-secondary {
-    @apply bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 focus:ring-gray-500;
-}
-.btn-outline {
-     @apply bg-transparent border border-gray-300 text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 focus:ring-brand-500;
-}
-</style>

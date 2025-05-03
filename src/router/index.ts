@@ -207,6 +207,30 @@ const router = createRouter({
       component: () => import('../views/SuperAdmin/AdminManagement.vue'),
       meta: { title: 'Admin Management', requiresAuth: false },
     },
+    {
+      path: '/super-admin/branches',
+      name: 'BranchOverview',
+      component: () => import('../views/SuperAdmin/BranchOverview.vue'),
+      meta: { title: 'Branch Overview', requiresAuth: false },
+    },
+    {
+      path: '/super-admin/analytics',
+      name: 'SystemAnalytics',
+      component: () => import('../views/SuperAdmin/SystemAnalytics.vue'),
+      meta: { title: 'System Analytics', requiresAuth: false },
+    },
+    {
+      path: '/super-admin/transactions',
+      name: 'GlobalTransactions',
+      component: () => import('../views/SuperAdmin/GlobalTransactions.vue'),
+      meta: { title: 'Global Transactions', requiresAuth: false },
+    },
+    {
+      path: '/super-admin/products',
+      name: 'ProductManagement',
+      component: () => import('../views/SuperAdmin/ProductManagement.vue'),
+      meta: { title: 'Product Management', requiresAuth: false },
+    },
     { path: '/:pathMatch(.*)*', redirect: '/error-404' }
   ],
 })

@@ -319,6 +319,26 @@ const menuGroups = [
         path: "/super-admin/admins",
       },
       {
+        icon: PieChartIcon,
+        name: "Branch Overview",
+        path: "/super-admin/branches",
+      },
+      {
+        icon: PieChartIcon,
+        name: "System Analytics",
+        path: "/super-admin/analytics",
+      },
+      {
+        icon: ListIcon,
+        name: "Global Transactions",
+        path: "/super-admin/transactions",
+      },
+      {
+        icon: BoxCubeIcon,
+        name: "Product Management",
+        path: "/super-admin/products",
+      },
+      {
         icon: TableIcon,
         name: "Stats & Reports",
         path: "/admin/stats-reports",

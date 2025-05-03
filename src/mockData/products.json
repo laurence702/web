@@ -1,26 +1,23 @@
 [
   {
-    "id": "prod_lpg_6",
-    "name": "LPG",
-    "unit": "6kg",
-    "pricePerUnit": 3000,
-    "minPurchase": 1,
-    "maxPurchase": 5
-  },
-  {
-    "id": "prod_lpg_12",
-    "name": "LPG",
-    "unit": "12.5kg",
-    "pricePerUnit": 6000,
-    "minPurchase": 1,
-    "maxPurchase": 3
-  },
-  {
     "id": "prod_pms",
-    "name": "PMS (Fuel)",
+    "name": "PMS",
+    "prices": [5000, 10000, 15000, 20000], 
     "unit": "litre",
-    "pricePerUnit": 800,
-    "minPurchase": 5,
-    "maxPurchase": 100
+    "unitPrice": 800 
+  },
+  {
+    "id": "prod_lpg",
+    "name": "LPG",
+    "prices": [3000, 6000, 9000, 12500], 
+    "unit": "kg",
+    "unitPrice": 1000 
+  },
+  {
+    "id": "prod_cng",
+    "name": "CNG",
+    "prices": [4000, 8000, 12000, 16000],
+    "unit": "scm", 
+    "unitPrice": 250 
   }
 ] 

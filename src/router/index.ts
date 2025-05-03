@@ -14,7 +14,7 @@ const router = createRouter({
       component: () => import('../views/Ecommerce.vue'),
       meta: {
         title: 'Dashboard',
-        requiresAuth: true,
+        requiresAuth: false,
       },
     },
     {
@@ -23,7 +23,7 @@ const router = createRouter({
       component: () => import('../views/Others/Calendar.vue'),
       meta: {
         title: 'Calendar',
-        requiresAuth: true,
+        requiresAuth: false,
       },
     },
     {
@@ -32,7 +32,7 @@ const router = createRouter({
       component: () => import('../views/Others/UserProfile.vue'),
       meta: {
         title: 'Profile',
-        requiresAuth: true,
+        requiresAuth: false,
       },
     },
     {
@@ -41,7 +41,7 @@ const router = createRouter({
       component: () => import('../views/Forms/FormElements.vue'),
       meta: {
         title: 'Form Elements',
-        requiresAuth: true,
+        requiresAuth: false,
       },
     },
     {
@@ -169,31 +169,31 @@ const router = createRouter({
       path: '/payments',
       name: 'Payments',
       component: () => import('../views/PlaceholderPage.vue'),
-      meta: { title: 'Payments', requiresAuth: true },
+      meta: { title: 'Payments', requiresAuth: false },
     },
     {
       path: '/riders',
       name: 'Riders',
       component: () => import('../views/PlaceholderPage.vue'),
-      meta: { title: 'Riders', requiresAuth: true },
+      meta: { title: 'Riders', requiresAuth: false },
     },
     {
       path: '/purchase',
       name: 'Purchase',
       component: () => import('../views/PlaceholderPage.vue'),
-      meta: { title: 'Purchase', requiresAuth: true },
+      meta: { title: 'Purchase', requiresAuth: false },
     },
     {
       path: '/admin/registration-approval',
       name: 'RegistrationApproval',
       component: () => import('../views/PlaceholderPage.vue'),
-      meta: { title: 'Registration Approval', requiresAuth: true },
+      meta: { title: 'Registration Approval', requiresAuth: false },
     },
     {
       path: '/admin/stats-reports',
       name: 'StatsReports',
       component: () => import('../views/PlaceholderPage.vue'),
-      meta: { title: 'Stats & Reports', requiresAuth: true },
+      meta: { title: 'Stats & Reports', requiresAuth: false },
     },
     {
       path: '/super-admin/dashboard',
@@ -205,7 +205,7 @@ const router = createRouter({
       path: '/super-admin/admins',
       name: 'AdminManagement',
       component: () => import('../views/SuperAdmin/AdminManagement.vue'),
-      meta: { title: 'Admin Management', requiresAuth: true },
+      meta: { title: 'Admin Management', requiresAuth: false },
     },
     { path: '/:pathMatch(.*)*', redirect: '/error-404' }
   ],

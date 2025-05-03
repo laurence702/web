@@ -4,13 +4,13 @@
       <div
         v-if="modelValue"
         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-60 dark:bg-opacity-75"
-        @click.self="closeOnOverlayClick ? closeModal() : null"  <!-- Close only on overlay click -->
+        @click.self="closeOnOverlayClick ? closeModal() : null"
         aria-modal="true"
         role="dialog"
       >
         <transition name="modal-slide">
           <div
-             v-if="modelValue"  <!-- Inner transition needs v-if too -->
+             v-if="modelValue"
             :class="[
                 'relative w-full bg-white rounded-lg shadow-xl dark:bg-gray-800',
                 modalSizeClass

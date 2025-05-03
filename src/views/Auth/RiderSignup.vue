@@ -123,9 +123,10 @@
              <div class="flex items-center justify-center z-1">
                <CommonGridShape />
                <div class="flex flex-col items-center max-w-xs">
-                 <router-link to="/" class="block mb-4">
-                   <img width="{231}" height="{48}" src="/images/logo/auth-logo.svg" alt="Logo" />
-                 </router-link>
+                  <!-- Replace image with styled text -->
+                  <h1 class="mb-4 text-4xl font-bold text-white">
+                    GasoPay
+                  </h1>
                  <p class="text-center text-gray-400 dark:text-white/60">
                    Join our network of efficient delivery riders.
                  </p>

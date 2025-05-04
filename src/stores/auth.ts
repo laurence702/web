@@ -1,8 +1,10 @@
 import { computed, ref } from 'vue'
 
+import type { ApiUser } from '@/services/apiService'
 import { defineStore } from 'pinia'
 // Import mock users - adjust path as needed
-import users from '@/mockData/users.json'
+// import users from '@/mockData/users.json'
+import { loginUser } from '@/services/apiService'
 
 // Define User type based on API payload
 type UserProfile = object | null; // Use object type
@@ -15,30 +17,57 @@ type User = {
   email: string;
   phone: string;
   role: Role; // Use the Role type alias
-  verification_status: 'pending' | 'verified' | 'rejected'; // Example statuses
+  verification_status: string; // Keep as string, specific values aren't critical for store state
   branch_id: string | null;
   user_profile: UserProfile;
-  created_at: string;
-  updated_at: string;
+  // created_at: string; // Omit if not needed in frontend state
+  // updated_at: string; // Omit if not needed in frontend state
 } | null;
+
+// Helper function to get item from localStorage safely
+function getItemFromLocalStorage<T>(key: string): T | null {
+    try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) as T : null;
+    } catch (error) {
+        console.error(`Error reading localStorage key "${key}":`, error);
+        return null;
+    }
+}
 
 export const useAuthStore = defineStore('auth', () => {
   // State
-  const currentUser = ref<User>(null);
-  const authToken = ref<string | null>(null); // Store the auth token
+  const currentUser = ref<User>(getItemFromLocalStorage<User>('user'));
+  const authToken = ref<string | null>(localStorage.getItem('token'));
   // Simple boolean derived from currentUser for easier checking in components/guards
   const isAuthenticated = computed(() => !!currentUser.value && !!authToken.value);
 
   // --- Actions ---
 
   // Action to handle successful login, storing user data and token
-  function setAuthData(userData: User, token: string) {
-    console.log('Setting auth data:', userData, token);
-    currentUser.value = userData;
+  function setAuthData(userData: ApiUser, token: string) {
+    console.log('Setting auth data:', userData);
+    // Map ApiUser to the User type used in the store
+    const storeUser: User = {
+        id: userData.id,
+        fullname: userData.fullname,
+        email: userData.email,
+        phone: userData.phone,
+        role: userData.role as Role, // Add validation/default if needed
+        verification_status: userData.verification_status,
+        branch_id: userData.branch_id,
+        user_profile: null, // Maybe simplify or omit from store if not directly used
+        // map other fields if needed
+    };
+
+    currentUser.value = storeUser;
     authToken.value = token;
-    // Optional: Persist to localStorage here
-    // localStorage.setItem('user', JSON.stringify(userData));
-    // localStorage.setItem('token', token);
+    try {
+        localStorage.setItem('user', JSON.stringify(storeUser));
+        localStorage.setItem('token', token);
+    } catch (error) {
+        console.error('Failed to save auth state to localStorage:', error);
+    }
   }
 
   // Action to clear auth data on logout
@@ -46,60 +75,58 @@ export const useAuthStore = defineStore('auth', () => {
     console.log('Clearing auth data');
     currentUser.value = null;
     authToken.value = null;
-     // Optional: Clear from localStorage here
-    // localStorage.removeItem('user');
-    // localStorage.removeItem('token');
+    try {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+    } catch (error) {
+         console.error('Failed to clear auth state from localStorage:', error);
+    }
   }
 
-  // Mock Login - Simulates API call and uses setAuthData on success
-  function mockLogin(email: string, /* password?: string */): boolean {
-    console.log(`Attempting mock login for: ${email}`);
-    const userFromMock = users.find((u) => u.email === email);
-
-    if (userFromMock) {
-        const userRole = userFromMock.role as Role;
-        // Check if phone property exists and cast to string before accessing
-        const userPhone = ('phone' in userFromMock && userFromMock.phone) ? String(userFromMock.phone) : ''; 
-
-        const loggedInUser: User = {
-            id: userFromMock.id,
-            fullname: userFromMock.name,
-            email: userFromMock.email,
-            phone: userPhone,
-            role: userRole,
-            verification_status: 'verified',
-            branch_id: userFromMock.branchId || null,
-            user_profile: null, 
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-        };
-        const mockToken = `mock_token_${Date.now()}`;
-
-        setAuthData(loggedInUser, mockToken);
-        return true;
-    } else {
-      console.log('Mock Login failed: User not found');
-      clearAuthData();
-      return false;
+  // Real Login Action
+  async function login(email: string, password: string): Promise<boolean> {
+     console.log(`Attempting real login for: ${email}`);
+    try {
+      const response = await loginUser(email, password); // Call API service
+      // On success, response contains { status, message, user, token }
+      setAuthData(response.user, response.token);
+      return true; // Indicate success
+    } catch (error) {
+      console.error('Login Action Failed:', error);
+      clearAuthData(); // Clear state on login failure
+      // Rethrow or handle error specifically for the component
+      throw error; // Let the component handle displaying the error message
     }
   }
 
   // Logout action
   function logout() {
     clearAuthData();
-    // Optional: Redirect logic can be handled in the component calling logout
+    // Optional: Redirect after logout (often done in component)
+    // Example: router.push('/signin');
   }
 
-  // TODO: Action to initialize store from localStorage (call this in App.vue or main layout)
-  // function loadAuthFromStorage() { ... }
+  // Function to load auth state - call this early in your app initialization
+  function loadAuthFromStorage() {
+      const storedUser = getItemFromLocalStorage<User>('user');
+      const storedToken = localStorage.getItem('token');
+      if (storedUser && storedToken) {
+          currentUser.value = storedUser;
+          authToken.value = storedToken;
+          console.log('Auth state loaded from storage.');
+      } else {
+          console.log('No auth state found in storage.');
+      }
+  }
 
   return {
       currentUser,
       authToken,
       isAuthenticated,
-      setAuthData, // Expose if needed externally
-      clearAuthData, // Expose if needed externally
-      mockLogin, // Keep mock login for now
-      logout
+      login, // Expose real login
+      logout,
+      loadAuthFromStorage // Expose loader
+      // setAuthData, // Might not need to expose these directly
+      // clearAuthData,
     };
 }) 

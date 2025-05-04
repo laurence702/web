@@ -201,16 +201,15 @@ const handleSubmit = async () => {
   isLoading.value = true
   errorMessage.value = null
   try {
-    const success = authStore.login(email.value)
-
-    if (success) {
-      await router.push('/')
+    await authStore.login(email.value, password.value)
+    await router.push('/')
+  } catch (error: unknown) {
+    console.error("Login Component Error:", error)
+    if (error instanceof Error) {
+      errorMessage.value = error.message || 'Login failed. Please check credentials.'
     } else {
-      errorMessage.value = 'Invalid email or password. Please try again.'
+      errorMessage.value = 'An unexpected error occurred during login.'
     }
-  } catch (error) {
-    console.error("Login error:", error)
-    errorMessage.value = 'An unexpected error occurred. Please try again later.'
   } finally {
     isLoading.value = false
   }

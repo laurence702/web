@@ -118,41 +118,47 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-// import { useAuthStore } from '@/stores/auth'; // Assuming a separate store or logic for riders might be needed
+import { useAuthStore } from '@/stores/auth'; // Import store
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue';
 import BaseInput from '@/components/common/BaseInput.vue';
 import CommonGridShape from '@/components/common/CommonGridShape.vue';
 
 const router = useRouter();
-// const authStore = useAuthStore(); // Replace with rider-specific auth logic
+const authStore = useAuthStore(); // Initialize store
 
 const email = ref('');
 const password = ref('');
 const isLoading = ref(false);
 const errorMessage = ref<string | null>(null);
 
-// Mock handleSubmit for now
+// Update handleSubmit
 const handleSubmit = async () => {
   isLoading.value = true;
   errorMessage.value = null;
   console.log('Rider Login Attempt:', { email: email.value, password: password.value });
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Call the actual login action from the store
+    await authStore.login(email.value, password.value);
 
-    // Mock success/failure
-    if (email.value === 'rider@test.com' && password.value === 'password') {
-      console.log('Mock Rider Login Success');
-      // Potentially set rider auth state here
-      // await router.push('/rider/dashboard'); // Redirect to rider dashboard (if exists)
-       alert('Mock Rider Login Successful! Redirecting...');
-       await router.push('/'); // Redirect to main dash for now
+    // Check if logged in user is actually a rider (optional but good practice)
+    if (authStore.currentUser?.role === 'rider') {
+        console.log('Rider Login Success');
+        alert('Rider Login Successful! Redirecting...');
+        // TODO: Redirect to a dedicated rider dashboard if it exists
+        await router.push('/'); // Redirect to main dash for now
     } else {
-      errorMessage.value = 'Invalid rider email or password.';
+        // Log out if the logged-in user isn't a rider
+        authStore.logout();
+        errorMessage.value = 'Login successful, but you are not authorized as a Rider.';
     }
-  } catch (error) {
-    console.error("Rider Login error:", error);
-    errorMessage.value = 'An unexpected error occurred.';
+
+  } catch (error: unknown) {
+    console.error("Rider Login Component Error:", error);
+    if (error instanceof Error) {
+        errorMessage.value = error.message || 'Login failed. Please check credentials.';
+    } else {
+        errorMessage.value = 'An unexpected error occurred during login.';
+    }
   } finally {
     isLoading.value = false;
   }

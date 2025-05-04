@@ -49,6 +49,7 @@
                   <!-- Step 2: Guarantor & Vehicle -->
                   <div v-if="currentStep === 2" class="space-y-5">
                      <BaseInput v-model="formData.guarantorName" label="Guarantor's Full Name" type="text" placeholder="Enter guarantor's full name" required inputId="guarantor-name" />
+                     <BaseInput v-model="formData.guarantorPhone" label="Guarantor's Phone" type="text" placeholder="Enter guarantor's Phone number" required inputId="guarantor-phone" />
                       <div>
                         <label for="guarantor-address" class="form-label">Guarantor's Address</label>
                         <textarea v-model="formData.guarantorAddress" id="guarantor-address" rows="3" placeholder="Enter guarantor's full address" required class="form-textarea"></textarea>
@@ -145,6 +146,7 @@ import FullScreenLayout from '@/components/layout/FullScreenLayout.vue';
 import BaseInput from '@/components/common/BaseInput.vue';
 import BaseSelect from '@/components/common/BaseSelect.vue';
 import CommonGridShape from '@/components/common/CommonGridShape.vue';
+import { registerRider } from '@/services/apiService'; // Import the service
 
 const router = useRouter();
 
@@ -251,24 +253,45 @@ const submitForm = async () => {
     errorMessage.value = passwordMismatchError.value;
     return;
   }
+  if (!formData.profilePicture) {
+      errorMessage.value = "Profile picture is required.";
+      // Or make it optional if desired
+      return;
+  }
 
   isLoading.value = true;
   errorMessage.value = null;
-  console.log('Rider Signup Submitted:', { ...formData, password: '[REDACTED]', confirmPassword: '[REDACTED]', profilePicture: formData.profilePicture?.name });
+
+  // Create FormData
+  const fd = new FormData();
+  fd.append('fullname', formData.name);
+  fd.append('email', formData.email);
+  fd.append('phone', formData.phone);
+  fd.append('password', formData.password);
+  fd.append('password_confirmation', formData.confirmPassword);
+  fd.append('role', 'Rider'); // Explicitly set role
+  fd.append('nin', formData.nin);
+  fd.append('vehicle_type', formData.vehicleType.toLowerCase());
+  fd.append('guarantors_name', formData.guarantorName);
+  fd.append('guarantors_phone', "1234567890");
+  fd.append('address', formData.address);
+  fd.append('profile_pic', formData.profilePicture);
+
+  console.log('Submitting Rider Registration FormData...');
 
   try {
-    // Simulate API call (including file upload)
-    // TODO: Replace with actual API call & Cloudinary upload logic
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Mock success
-    console.log('Mock Rider Signup Success');
-    alert('Mock Rider Signup Successful! Redirecting to Signin...');
+    const response = await registerRider(fd); // Call API service
+    console.log('Rider Signup Success Response:', response);
+    alert('Rider Signup Successful! Redirecting to Signin...');
     await router.push('/rider/signin');
 
-  } catch (error) {
-    console.error("Rider Signup error:", error);
-    errorMessage.value = 'An unexpected error occurred during signup.';
+  } catch (error: unknown) {
+    console.error("Rider Signup Component Error:", error);
+     if (error instanceof Error) {
+        errorMessage.value = error.message || 'An unexpected error occurred during signup.';
+    } else {
+        errorMessage.value = 'An unexpected error occurred during signup.';
+    }
   } finally {
     isLoading.value = false;
   }

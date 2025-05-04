@@ -38,7 +38,7 @@
                   Sign In to GasoPay
                 </h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400">
-                  Enter your email and password to sign in!
+                  Enter your email or phone number and password to sign in!
                 </p>
               </div>
               <div>
@@ -48,20 +48,20 @@
                     <div v-if="errorMessage" class="p-3 text-sm text-red-700 bg-red-100 border border-red-300 rounded-lg dark:bg-red-900/30 dark:border-red-700 dark:text-red-400">
                       {{ errorMessage }}
                     </div>
-                    <!-- Email -->
+                    <!-- Login Identifier Input -->
                     <div>
                       <label
-                        for="email"
+                        for="login-identifier"
                         class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
                       >
-                        Email<span class="text-error-500">*</span>
+                        Email or Phone Number<span class="text-error-500">*</span>
                       </label>
                       <input
-                        v-model="email"
-                        type="email"
-                        id="email"
-                        name="email"
-                        placeholder="info@gasopay.com"
+                        v-model="loginIdentifier"
+                        type="text"
+                        id="login-identifier"
+                        name="login-identifier"
+                        placeholder="Enter your email or phone number"
                         required
                         class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                       />
@@ -187,7 +187,7 @@ import CommonGridShape from '@/components/common/CommonGridShape.vue'
 const router = useRouter()
 const authStore = useAuthStore()
 
-const email = ref('')
+const loginIdentifier = ref('')
 const password = ref('')
 const showPassword = ref(false)
 const isLoading = ref(false)
@@ -201,7 +201,7 @@ const handleSubmit = async () => {
   isLoading.value = true
   errorMessage.value = null
   try {
-    await authStore.login(email.value, password.value)
+    await authStore.login(loginIdentifier.value, password.value)
     await router.push('/')
   } catch (error: unknown) {
     console.error("Login Component Error:", error)

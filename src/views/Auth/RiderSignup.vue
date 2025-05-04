@@ -49,7 +49,7 @@
                   <!-- Step 2: Guarantor & Vehicle -->
                   <div v-if="currentStep === 2" class="space-y-5">
                      <BaseInput v-model="formData.guarantorName" label="Guarantor's Full Name" type="text" placeholder="Enter guarantor's full name" required inputId="guarantor-name" />
-                     <BaseInput v-model="formData.guarantorPhone" label="Guarantor's Phone" type="text" placeholder="Enter guarantor's Phone number" required inputId="guarantor-phone" />
+                     <BaseInput v-model="formData.guarantorPhone" label="Guarantor's Phone" type="tel" placeholder="Enter guarantor's Phone number" required inputId="guarantor-phone" />
                       <div>
                         <label for="guarantor-address" class="form-label">Guarantor's Address</label>
                         <textarea v-model="formData.guarantorAddress" id="guarantor-address" rows="3" placeholder="Enter guarantor's full address" required class="form-textarea"></textarea>
@@ -68,9 +68,27 @@
                   <div v-if="currentStep === 3" class="space-y-5">
                        <div>
                         <label for="profile-picture" class="form-label">Profile Picture</label>
-                        <input type="file" id="profile-picture" @change="handleFileChange" accept="image/*" class="form-file-input" />
-                        <p class="text-xs text-gray-500 mt-1">Upload a clear picture (JPG, PNG). Max 2MB.</p>
-                        <!-- Add preview if needed later -->
+                        <input
+                           type="file"
+                           id="profile-picture"
+                           @change="handleFileChange"
+                           accept="image/*"
+                           class="form-file-input"
+                           :disabled="uploadingProfilePic"
+                         />
+                         <!-- Upload Status/Error Display -->
+                         <div v-if="uploadingProfilePic" class="mt-2 text-sm text-blue-600 dark:text-blue-400">
+                             Uploading picture...
+                         </div>
+                         <div v-if="uploadError" class="mt-2 text-sm text-red-600 dark:text-red-400">
+                             {{ uploadError }}
+                         </div>
+                         <div v-if="formData.profilePicUrl && !uploadingProfilePic && !uploadError" class="mt-2 text-sm text-green-600 dark:text-green-400">
+                              ✅ Picture uploaded successfully!
+                         </div>
+                         <p v-else-if="!formData.profilePicUrl && !uploadingProfilePic" class="text-xs text-gray-500 mt-1">
+                             Upload a clear picture (JPG, PNG). Max 2MB.
+                         </p>
                        </div>
                       <BaseInput v-model="formData.password" label="Password" type="password" placeholder="Enter your password" required inputId="rider-password-signup" />
                       <BaseInput v-model="formData.confirmPassword" label="Confirm Password" type="password" placeholder="Confirm your password" required inputId="rider-confirm-password" :error="passwordMismatchError" />
@@ -83,7 +101,7 @@
                         @click="prevStep"
                         v-if="currentStep > 1"
                         class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                        :disabled="isLoading"
+                        :disabled="isLoading || uploadingProfilePic" 
                       >
                         Previous
                       </button>
@@ -92,7 +110,7 @@
                       <button
                         type="submit"
                         class="px-4 py-2 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                        :disabled="isLoading || (currentStep === 3 && !!passwordMismatchError)" 
+                        :disabled="isLoading || uploadingProfilePic || (currentStep === 3 && !!passwordMismatchError)" 
                       >
                         <span v-if="isLoading && currentStep === 3">Creating Account...</span>
                         <span v-else-if="currentStep < 3">Next</span>
@@ -142,17 +160,30 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { registerRider } from '@/services/apiService'; // Import the service
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue';
 import BaseInput from '@/components/common/BaseInput.vue';
 import BaseSelect from '@/components/common/BaseSelect.vue';
 import CommonGridShape from '@/components/common/CommonGridShape.vue';
-import { registerRider } from '@/services/apiService'; // Import the service
 
 const router = useRouter();
 
+const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+if (!CLOUDINARY_CLOUD_NAME) {
+    console.error("Error: VITE_CLOUDINARY_CLOUD_NAME is not set in .env file!");
+}
+if (!CLOUDINARY_UPLOAD_PRESET) {
+     console.error("Error: VITE_CLOUDINARY_UPLOAD_PRESET is not set in .env file!");
+}
+
+// --- Component State ---
 const currentStep = ref(1);
-const isLoading = ref(false);
+const isLoading = ref(false); // For final form submission
 const errorMessage = ref<string | null>(null);
+const uploadingProfilePic = ref(false); // Separate loading state for upload
+const uploadError = ref<string | null>(null); // Error specific to upload
 
 const formData = reactive({
   name: '',
@@ -162,8 +193,10 @@ const formData = reactive({
   nin: '',
   guarantorName: '',
   guarantorAddress: '',
-  vehicleType: '', // e.g., 'Keke' or 'Car'
-  profilePicture: null as File | null,
+  guarantorPhone: '', // Added this field
+  vehicleType: '',
+  profilePictureFile: null as File | null, // Store the raw file temporarily
+  profilePicUrl: '', // Store the Cloudinary URL
   password: '',
   confirmPassword: '',
 });
@@ -188,13 +221,52 @@ const passwordMismatchError = computed(() => {
   return '';
 });
 
-const handleFileChange = (event: Event) => {
+const handleFileChange = async (event: Event) => {
   const target = event.target as HTMLInputElement;
-  if (target.files && target.files[0]) {
-    formData.profilePicture = target.files[0];
-    // TODO: Add preview logic if needed
-    // TODO: Add validation for file size/type later
-    console.log("Profile picture selected:", formData.profilePicture);
+  const file = target.files?.[0];
+
+  if (!file) {
+    formData.profilePictureFile = null;
+    formData.profilePicUrl = '';
+    uploadError.value = null;
+    return;
+  }
+
+  formData.profilePictureFile = file;
+  uploadingProfilePic.value = true;
+  uploadError.value = null;
+  formData.profilePicUrl = ''; // Clear previous URL
+
+  console.log("Starting Cloudinary upload for:", file.name);
+
+  const uploadFormData = new FormData();
+  uploadFormData.append('file', file);
+  uploadFormData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+  try {
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+          method: 'POST',
+          body: uploadFormData,
+      });
+      const data = await response.json();
+      if (!response.ok || data.error) {
+          console.error('Cloudinary Upload Error Response:', data);
+          throw new Error(data.error?.message || 'Cloudinary upload failed.');
+      }
+      console.log('Cloudinary Upload Success:', data);
+      formData.profilePicUrl = data.secure_url; // Store the secure URL
+      uploadError.value = null; // Clear any previous error
+  } catch (error: unknown) {
+    console.error("Cloudinary Upload Error:", error);
+     if (error instanceof Error) {
+        uploadError.value = `Upload failed: ${error.message}`;
+    } else {
+        uploadError.value = 'An unknown error occurred during upload.';
+    }
+    formData.profilePictureFile = null; // Clear file on error
+    formData.profilePicUrl = '';      // Clear URL on error
+  } finally {
+    uploadingProfilePic.value = false;
   }
 };
 
@@ -212,81 +284,76 @@ const prevStep = () => {
 }
 
 const handleNextOrSubmit = () => {
-    errorMessage.value = null; // Clear previous errors
+    errorMessage.value = null; // Clear previous form errors
+    uploadError.value = null; // Clear previous upload errors
 
-    // Simple validation check (can be expanded)
+    // --- Step Validations --- 
     if (currentStep.value === 1 && (!formData.name || !formData.email || !formData.phone || !formData.address || !formData.nin)) {
-        errorMessage.value = "Please fill in all personal details.";
-        return;
+        errorMessage.value = "Please fill in all personal details."; return;
     }
-    if (currentStep.value === 2 && (!formData.guarantorName || !formData.guarantorAddress || !formData.vehicleType)) {
-         errorMessage.value = "Please fill in all guarantor and vehicle details.";
-        return;
+    if (currentStep.value === 2 && (!formData.guarantorName || !formData.guarantorPhone || !formData.guarantorAddress || !formData.vehicleType)) {
+         errorMessage.value = "Please fill in all guarantor and vehicle details."; return;
     }
      if (currentStep.value === 3 && (!formData.password || !formData.confirmPassword)) {
-         errorMessage.value = "Password fields are required.";
-        return;
+         errorMessage.value = "Password fields are required."; return;
     }
      if (currentStep.value === 3 && !!passwordMismatchError.value) {
-        errorMessage.value = passwordMismatchError.value;
-        return;
+        errorMessage.value = passwordMismatchError.value; return;
     }
-     // Basic check for profile picture, can be made optional if needed
-     if (currentStep.value === 3 && !formData.profilePicture) {
-        errorMessage.value = "Profile picture is required.";
-        return;
+     if (currentStep.value === 3 && !formData.profilePicUrl && formData.profilePictureFile) {
+         uploadError.value = uploadError.value || "Profile picture is still uploading or failed.";
+         return;
      }
-
+      if (currentStep.value === 3 && !formData.profilePicUrl && !formData.profilePictureFile){
+          errorMessage.value = "Profile picture is required."; return;
+      }
 
     if (currentStep.value < 3) {
         nextStep();
     } else {
-        // Final step - submit the form
         submitForm();
     }
 }
 
-
-// Mock submitForm for now
 const submitForm = async () => {
+  // Final check before submission
   if (passwordMismatchError.value) {
-    errorMessage.value = passwordMismatchError.value;
-    return;
+    errorMessage.value = passwordMismatchError.value; return;
   }
-  if (!formData.profilePicture) {
-      errorMessage.value = "Profile picture is required.";
-      // Or make it optional if desired
-      return;
-  }
+   if (!formData.profilePicUrl) {
+      errorMessage.value = "Profile picture upload is required or failed."; return;
+   }
 
-  isLoading.value = true;
+  isLoading.value = true; // Use the main form loading state
   errorMessage.value = null;
 
-  // Create FormData
+  // Create FormData for your backend API
   const fd = new FormData();
   fd.append('fullname', formData.name);
   fd.append('email', formData.email);
   fd.append('phone', formData.phone);
   fd.append('password', formData.password);
   fd.append('password_confirmation', formData.confirmPassword);
-  fd.append('role', 'Rider'); // Explicitly set role
+  fd.append('role', 'Rider');
   fd.append('nin', formData.nin);
   fd.append('vehicle_type', formData.vehicleType.toLowerCase());
   fd.append('guarantors_name', formData.guarantorName);
-  fd.append('guarantors_phone', "1234567890");
+  fd.append('guarantors_phone', formData.guarantorPhone); // Use the added field
+  fd.append('guarantors_address', formData.guarantorAddress);
   fd.append('address', formData.address);
-  fd.append('profile_pic', formData.profilePicture);
+  // Send the Cloudinary URL to your backend
+  fd.append('profilePicUrl', formData.profilePicUrl);
 
-  console.log('Submitting Rider Registration FormData...');
+  console.log('Submitting Rider Registration Data to Backend...');
 
   try {
-    const response = await registerRider(fd); // Call API service
-    console.log('Rider Signup Success Response:', response);
+    const response = await registerRider(fd); // Call your backend API service
+    console.log('Backend Signup Success Response:', response);
     alert('Rider Signup Successful! Redirecting to Signin...');
     await router.push('/rider/signin');
 
   } catch (error: unknown) {
-    console.error("Rider Signup Component Error:", error);
+    console.error("Backend Signup Component Error:", error);
      if (error instanceof Error) {
         errorMessage.value = error.message || 'An unexpected error occurred during signup.';
     } else {

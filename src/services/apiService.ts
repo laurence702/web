@@ -22,23 +22,28 @@ interface RiderRegistrationResponse {
   data: ApiUser; // The user data is nested under 'data'
 }
 
-const BASE_URL = 'http://localhost:8000/api'; // Adjust if your backend URL is different
+// Read Base URL from environment variable
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+
+if (!import.meta.env.VITE_API_BASE_URL) {
+  console.warn('VITE_API_BASE_URL is not set in .env, using default http://localhost:8000/api');
+}
 
 /**
- * Performs a login request to the backend.
- * @param {string} email - The user's email.
+ * Performs a login request to the backend using email or phone.
+ * @param {string} login_identifier - The user's email or phone number.
  * @param {string} password - The user's password.
  * @returns {Promise<LoginResponse>} - The parsed JSON response from the API.
  * @throws {Error} - Throws an error if the login fails or the response is not ok.
  */
-export async function loginUser(email: string, password: string): Promise<LoginResponse> {
+export async function loginUser(login_identifier: string, password: string): Promise<LoginResponse> {
   const response = await fetch(`${BASE_URL}/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ login_identifier, password }),
   });
 
   // We expect JSON, even for errors potentially

@@ -84,10 +84,10 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   // Real Login Action
-  async function login(email: string, password: string): Promise<boolean> {
-     console.log(`Attempting real login for: ${email}`);
+  async function login(login_identifier: string, password: string): Promise<boolean> {
+     console.log(`Attempting real login for: ${login_identifier}`);
     try {
-      const response = await loginUser(email, password); // Call API service
+      const response = await loginUser(login_identifier, password); // Pass login_identifier
       // On success, response contains { status, message, user, token }
       setAuthData(response.user, response.token);
       return true; // Indicate success

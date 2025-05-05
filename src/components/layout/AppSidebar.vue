@@ -345,6 +345,16 @@ const menuGroups = [
       },
     ],
   },
+  {
+    title: "RIDER",
+    items: [
+      {
+        icon: UserCircleIcon,
+        name: "My Profile",
+        path: "/rider/profile",
+      },
+    ],
+  },
 ];
 
 const isActive = (path: string) => route.path === path;

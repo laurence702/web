@@ -1,7 +1,7 @@
+import { Role, useAuthStore } from '@/stores/auth'
 import { createRouter, createWebHistory } from 'vue-router'
 
 import AdminLayout from '@/components/layout/AdminLayout.vue' // Import the layout
-import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -201,6 +201,12 @@ const router = createRouter({
           component: () => import('../views/SuperAdmin/ProductManagement.vue'),
           meta: { title: 'Product Management', requiresAuth: false },
         },
+        {
+          path: '/rider/profile',
+          name: 'RiderProfile',
+          component: () => import('../views/Rider/Profile.vue'),
+          meta: { title: 'Rider Profile', requiresAuth: false, allowedRoles: ['rider'] } // TEMP: Unguarded for debugging
+        },
         // --- NESTED ROUTES END ---
       ]
     },
@@ -255,21 +261,36 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
-  const publicPages = ['/signin', '/signup', '/password-reset']
+  const allowedRoles = to.meta.allowedRoles as Role[] | undefined
+  const publicPages = ['/signin', '/signup', '/password-reset', '/rider/signin', '/rider/signup']
+
+  if (!authStore.isInitialized) {
+    await authStore.loadAuthFromStorage()
+  }
 
   document.title = to.meta.title ? `GasoPay | ${to.meta.title}` : 'GasoPay'
 
-  if (requiresAuth && !authStore.isAuthenticated) {
-    console.log('Redirecting to login, requiresAuth=true, isAuthenticated=false')
-    next('/signin')
-  } else if (!requiresAuth && authStore.isAuthenticated && publicPages.includes(to.path)) {
-    console.log('Redirecting to dashboard, requiresAuth=false, isAuthenticated=true, path is public auth page')
-    next('/')
+  const currentRole = authStore.userRole
+
+  if (requiresAuth) {
+    if (!authStore.token || !authStore.currentUser) {
+      console.log(`Redirecting to login, requiresAuth=true, token exists=${!!authStore.token}, user exists=${!!authStore.currentUser}`);
+      next(to.path.startsWith('/rider/') ? '/rider/signin' : '/signin');
+    } else if (allowedRoles && (!currentRole || !allowedRoles.includes(currentRole))) {
+      console.log(`Redirecting to dashboard, user role '${currentRole}' not in allowedRoles:`, allowedRoles);
+      next('/');
+    } else {
+      console.log('Allowing navigation to protected route, user authenticated and has role.')
+      next()
+    }
+  } else if (authStore.isAuthenticated && publicPages.includes(to.path)) {
+    console.log('Redirecting to dashboard, isAuthenticated=true, path is public auth page')
+    next(currentRole === Role.RIDER ? '/rider/profile' : '/')
   } else {
-    console.log('Allowing navigation')
+    console.log('Allowing navigation to public route.')
     next()
   }
 })

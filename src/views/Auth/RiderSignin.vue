@@ -118,7 +118,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth'; // Import store
+import { useAuthStore, Role } from '@/stores/auth'; // Import Role enum
+import { loginUser } from '@/services/apiService'; // Import loginUser API function
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue';
 import BaseInput from '@/components/common/BaseInput.vue';
 import CommonGridShape from '@/components/common/CommonGridShape.vue';
@@ -135,30 +136,37 @@ const errorMessage = ref<string | null>(null);
 const handleSubmit = async () => {
   isLoading.value = true;
   errorMessage.value = null;
-  console.log('Rider Login Attempt:', { email: email.value, password: password.value });
-  try {
-    // Call the actual login action from the store
-    await authStore.login(email.value, password.value);
+  console.log('Rider Login Attempt:', { email: email.value }); // Don't log password
 
-    // Check if logged in user is actually a rider (optional but good practice)
-    if (authStore.currentUser?.role === 'rider') {
-        console.log('Rider Login Success');
-        alert('Rider Login Successful! Redirecting...');
-        // TODO: Redirect to a dedicated rider dashboard if it exists
-        await router.push('/'); // Redirect to main dash for now
+  try {
+    // 1. Call the API service function
+    const loginResponse = await loginUser(email.value, password.value);
+
+    // 2. Pass the full response to the store action
+    await authStore.login(loginResponse);
+
+    // 3. Check role using the computed property and Enum
+    if (authStore.userRole === Role.RIDER) {
+      console.log('Rider Login Success, redirecting to profile.');
+      // 4. Redirect to the Rider Profile page
+      await router.push({ name: 'RiderProfile' }); // Use route name for robustness
     } else {
-        // Log out if the logged-in user isn't a rider
-        authStore.logout();
-        errorMessage.value = 'Login successful, but you are not authorized as a Rider.';
+      // If login succeeded but role is wrong, log out and show error
+      const actualRole = authStore.userRole;
+      console.warn(`Login succeeded but user role is '${actualRole}', not 'RIDER'. Logging out.`);
+      authStore.logout();
+      errorMessage.value = `Login successful, but your role (${actualRole}) is not authorized for the Rider section.`;
     }
 
   } catch (error: unknown) {
     console.error("Rider Login Component Error:", error);
     if (error instanceof Error) {
-        errorMessage.value = error.message || 'Login failed. Please check credentials.';
+      errorMessage.value = error.message || 'Login failed. Please check credentials.';
     } else {
-        errorMessage.value = 'An unexpected error occurred during login.';
+      errorMessage.value = 'An unexpected error occurred during login.';
     }
+    // Ensure logout on API failure if needed (depends on desired UX)
+    // authStore.logout();
   } finally {
     isLoading.value = false;
   }

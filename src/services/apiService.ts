@@ -1,3 +1,21 @@
+// Define the expected structure of the User object in the API response
+
+// Define detailed UserProfile structure based on observed/expected data
+export interface UserProfileData { // Export this
+  id?: string; // Assuming these might be present
+  user_id?: string;
+  address?: string;
+  vehicle_type?: string;
+  nin?: string;
+  guarantors_name?: string;
+  guarantors_phone?: string;
+  guarantors_address?: string;
+  profile_pic_url?: string | null; // The profile picture URL from Cloudinary?
+  barcode?: string | null;
+  total_pickups?: number; // Added based on profile page usage
+  current_debt?: number; // Added based on profile page usage
+}
+
 export interface ApiUser {
   id: string;
   fullname: string;
@@ -6,20 +24,30 @@ export interface ApiUser {
   role: string;
   verification_status: string;
   branch_id: string | null;
-  user_profile: object | null;
+  user_profile: UserProfileData | null;
   created_at: string;
   updated_at: string;
 }
 
-interface LoginResponse {
-  status: "success";
+// Define the expected structure of the successful login response
+export interface LoginResponse { // Export this
   message: string;
+  access_token: string;
+  token_type: string;
   user: ApiUser;
-  token: string;
 }
 
-interface RiderRegistrationResponse {
-  data: ApiUser; // The user data is nested under 'data'
+// Define the expected structure of the successful Rider Registration response
+export interface RiderRegistrationResponse { // Export this
+    message: string;
+    access_token: string;
+    token_type: string;
+    user: ApiUser;
+}
+
+// Define the expected structure of the /me response
+interface GetMeResponse {
+  user: ApiUser; // Assuming endpoint returns the user object directly or nested
 }
 
 // Read Base URL from environment variable
@@ -106,6 +134,47 @@ export async function registerRider(formData: FormData): Promise<RiderRegistrati
 
   // Assuming successful response structure matches RiderRegistrationResponse
   return data as RiderRegistrationResponse;
+}
+
+/**
+ * Fetches the current authenticated user's details.
+ * @param {string} token - The authentication token.
+ * @returns {Promise<GetMeResponse>} - The user data response.
+ * @throws {Error} - Throws error on network failure or non-ok response.
+ */
+export async function getMe(token: string): Promise<GetMeResponse> {
+  if (!token) {
+    throw new Error("Authentication token is missing.");
+  }
+
+  const response = await fetch(`${BASE_URL}/me`, { // Endpoint for current user
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`, // Add Authorization header
+    },
+  });
+
+  let data;
+  try {
+      data = await response.json();
+  } catch {
+      throw new Error(`Failed to parse /me response. Status: ${response.status}`);
+  }
+
+  if (!response.ok) {
+    console.error("GetMe API Error Response:", data);
+    throw new Error(data.message || `/me request failed. Status: ${response.status}`);
+  }
+
+   // Assuming the response directly contains the user object or { user: ApiUser }
+   if (data.user) {
+       return data as GetMeResponse; // Assumes { user: ApiUser } structure
+   } else {
+        // Attempt to handle if user object is returned directly at top level
+        return { user: data as ApiUser };
+   }
+
 }
 
 // Add other API functions here as needed (e.g., registerUser, fetchUserData) 

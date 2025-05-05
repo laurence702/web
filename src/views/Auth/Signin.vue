@@ -177,10 +177,11 @@
   </FullScreenLayout>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" name="UserSignin">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore, Role } from '@/stores/auth'
+import { loginUser } from '@/services/apiService'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
 import CommonGridShape from '@/components/common/CommonGridShape.vue'
 
@@ -201,10 +202,26 @@ const handleSubmit = async () => {
   isLoading.value = true
   errorMessage.value = null
   try {
-    await authStore.login(loginIdentifier.value, password.value)
-    await router.push('/')
+    const loginResponse = await loginUser(loginIdentifier.value, password.value)
+    await authStore.login(loginResponse)
+    const userRole = authStore.userRole
+    console.log('Login successful, user role:', userRole)
+    switch (userRole) {
+      case Role.SUPER_ADMIN:
+        await router.push({ name: 'SuperAdminDashboard' })
+        break
+      case Role.ADMIN:
+        await router.push({ name: 'SuperAdminDashboard' })
+        break
+      case Role.RIDER:
+      await router.push({ name: 'RiderProfile' })
+        break
+      default:
+        authStore.logout()
+        errorMessage.value = `Login successful, but your role (${userRole}) is not recognized or supported here.`
+    }
   } catch (error: unknown) {
-    console.error("Login Component Error:", error)
+    console.error("Signin Component Error:", error)
     if (error instanceof Error) {
       errorMessage.value = error.message || 'Login failed. Please check credentials.'
     } else {

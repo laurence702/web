@@ -46,7 +46,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import Dropzone from 'dropzone'
 import 'dropzone/dist/dropzone.css'
@@ -58,9 +58,9 @@ const props = defineProps({
   },
 })
 
-const dropzoneForm = ref(null)
+const dropzoneForm = ref<HTMLFormElement | null>(null)
 const dropzoneId = `dropzone-${Math.random().toString(36).substr(2, 9)}`
-let dropzoneInstance = null
+let dropzoneInstance: Dropzone | null = null
 
 onMounted(() => {
   Dropzone.autoDiscover = false
@@ -73,13 +73,13 @@ onMounted(() => {
     headers: { 'My-Awesome-Header': 'header value' },
     dictDefaultMessage: '',
     init: function () {
-      this.on('addedfile', (file) => {
+      this.on('addedfile', (file: Dropzone.DropzoneFile) => {
         console.log('A file has been added', file)
       })
-      this.on('success', (file, response) => {
+      this.on('success', (file: Dropzone.DropzoneFile, response: any) => {
         console.log('File successfully uploaded', file, response)
       })
-      this.on('error', (file, error) => {
+      this.on('error', (file: Dropzone.DropzoneFile, error: any) => {
         console.error('An error occurred during upload', file, error)
       })
     },

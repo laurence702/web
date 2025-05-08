@@ -57,7 +57,7 @@
                     placeholder="your.email@example.com"
                     required
                     inputId="reset-email"
-                    :disabled="isLoading || message && !isError" 
+                    :disabled="!!(isLoading || (message && !isError))" 
                   />
 
                   <!-- Button -->
@@ -65,7 +65,7 @@
                     <button
                       type="submit"
                       class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                      :disabled="isLoading || message && !isError"
+                      :disabled="!!(isLoading || (message && !isError))"
                     >
                       <span v-if="isLoading">Sending Link...</span>
                       <span v-else>Send Reset Link</span>

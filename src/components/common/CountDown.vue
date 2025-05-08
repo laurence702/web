@@ -51,18 +51,24 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 
-const daysArray = ref([])
-const hoursArray = ref([])
-const minutesArray = ref([])
-const secondsArray = ref([])
+interface TimeDigit {
+  value: string;
+  visible: boolean;
+  remainingPercentage?: number; // Make optional as it might not always be there
+}
+
+const daysArray = ref<TimeDigit[]>([])
+const hoursArray = ref<TimeDigit[]>([])
+const minutesArray = ref<TimeDigit[]>([])
+const secondsArray = ref<TimeDigit[]>([])
 const endTime = new Date('December 20, 2025 23:59:59 GMT+0530').getTime()
 const now = ref(new Date().getTime())
 const timeLeft = ref(0)
 
-let counter
+let counter: number | undefined; // Typed counter
 
 const countdown = () => {
   counter = setInterval(() => {
@@ -72,17 +78,19 @@ const countdown = () => {
     updateTimeArrays()
 
     if (timeLeft.value <= 0) {
-      clearInterval(counter)
+      if (counter) clearInterval(counter); // Check if counter is defined
       resetTimeArrays()
     }
   }, 1000)
 }
 
-const format = (value) => {
+const format = (value: number): string => {
   if (value < 10) {
     return '0' + Math.floor(value)
-  } else return Math.floor(value)
+  } else return String(Math.floor(value)) // Ensure string return
 }
+
+type TimeUnit = 'days' | 'hours' | 'minutes' | 'seconds';
 
 const updateTimeArrays = () => {
   daysArray.value = getTimeArray(timeLeft.value / (60 * 60 * 24), 'days')
@@ -91,7 +99,7 @@ const updateTimeArrays = () => {
   secondsArray.value = getTimeArray(timeLeft.value % 60, 'seconds')
 }
 
-const getMaxValueForUnit = (unit) => {
+const getMaxValueForUnit = (unit: TimeUnit): number => {
   switch (unit) {
     case 'days':
       return 365
@@ -101,14 +109,13 @@ const getMaxValueForUnit = (unit) => {
       return 60
     case 'seconds':
       return 60
-    default:
-      return 1
+    // default case removed as TimeUnit covers all options
   }
 }
 
-const getTimeArray = (value, unit) => {
-  let stringValue = format(value).toString()
-  let percentage = (value / getMaxValueForUnit(unit)) * 100
+const getTimeArray = (value: number, unit: TimeUnit): TimeDigit[] => {
+  const stringValue = format(value).toString()
+  const percentage = (value / getMaxValueForUnit(unit)) * 100
   return stringValue.split('').map((digit) => ({
     value: digit,
     visible: true,
@@ -116,13 +123,13 @@ const getTimeArray = (value, unit) => {
   }))
 }
 
-const calcOverlayHeight = () => {
-  if (daysArray.value.length > 0) {
-    let remainingDaysPercentage = daysArray.value[0].remainingPercentage
-    return `${remainingDaysPercentage}%`
-  }
-  return '0%'
-}
+// const calcOverlayHeight = () => { // Removed as unused
+//   if (daysArray.value.length > 0) {
+//     const remainingDaysPercentage = daysArray.value[0].remainingPercentage
+//     return `${remainingDaysPercentage}%`
+//   }
+//   return '0%'
+// }
 
 const resetTimeArrays = () => {
   daysArray.value = [{ value: '0', visible: true }]

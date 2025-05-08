@@ -101,11 +101,11 @@ const columns = ref([
 // --- Modal State ---
 const showCreateAdminModal = ref(false);
 const showEditAdminModal = ref(false);
-const editingAdminData = ref<Partial<AdminUser> | null>(null);
+const editingAdminData = ref<Partial<AdminUser> | undefined>(undefined);
 
 // --- Modal Openers ---
 const openCreateModal = () => {
-    editingAdminData.value = null; // Clear editing state
+    editingAdminData.value = undefined; // Clear editing state
     showCreateAdminModal.value = true;
 }
 
@@ -146,7 +146,7 @@ const handleUpdateAdmin = (formData: Partial<AdminUser> & { password?: string })
          alert('Error: Could not find admin to update.');
      }
      showEditAdminModal.value = false; // Close modal
-     editingAdminData.value = null; // Clear editing state
+     editingAdminData.value = undefined; // Clear editing state
 }
 
 // --- Action Handlers ---

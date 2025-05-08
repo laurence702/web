@@ -47,7 +47,7 @@
                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
              </button>
              <button
-                @click="openUserDetailsModal(row as ApiUser)"
+                @click="openUserDetailsModal(row as unknown as ApiUser)"
                 class="btn btn-xs btn-ghost text-blue-500 hover:bg-blue-100"
                 title="View Details"
              >
@@ -70,7 +70,7 @@
         <template #body>
             <div v-if="selectedRiderForModal" class="mt-4 space-y-4">
                  <img 
-                    :src="selectedRiderForModal.user_profile?.photo || DefaultAvatar"
+                    :src="selectedRiderForModal.user_profile?.profile_pic_url || DefaultAvatar"
                     alt="Rider Photo"
                     class="h-24 w-24 rounded-full object-cover mx-auto border"
                     @error="(event: Event) => (event.target as HTMLImageElement).src = DefaultAvatar"

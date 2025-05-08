@@ -22,7 +22,7 @@
           </span>
       </template>
        <template #cell-branch="{ row }">
-          <span>{{ getBranchName(row.branch) }}</span>
+          <span>{{ getBranchName(row.branch as ApiUser['branch']) }}</span>
       </template>
       <template #cell-is_active="{ row }">
            <span :class="row.is_active ? 'text-green-600' : 'text-red-600'">

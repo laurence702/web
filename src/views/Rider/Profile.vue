@@ -112,13 +112,7 @@ const recentActivity = ref([
           <p class="text-gray-500 text-sm">{{ authStore.currentUser.email }}</p>
           <p class="text-gray-500 text-sm">{{ authStore.currentUser.phone }}</p>
 
-          <!-- Generate QR Code Button -->
-          <button
-            @click="openQrModal"
-            class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-          >
-            Generate Identification QR Code
-          </button>
+        
         </BaseCard>
 
         <!-- Right Column: Details & Activity -->
@@ -148,6 +142,17 @@ const recentActivity = ref([
               <div>
                 <dt class="text-sm font-medium text-gray-500">Vehicle Type</dt>
                 <dd class="mt-1 text-sm text-gray-900">{{ authStore.currentUser.user_profile?.vehicle_type || 'Not Provided' }}</dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Generate QR Code</dt>
+                  <!-- Generate QR Code Button -->
+                  <button
+                    @click="openQrModal"
+                    class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                  >
+                    Generate Identification QR Code
+                  </button>
+                
               </div>
                <!-- Add more profile fields as needed -->
             </dl>

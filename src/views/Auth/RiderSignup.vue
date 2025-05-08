@@ -350,7 +350,7 @@ const submitForm = async () => {
     const response = await registerRider(fd); // Call your backend API service
     console.log('Backend Signup Success Response:', response);
     alert('Rider Signup Successful! Redirecting to Signin...');
-    await router.push('/rider/signin');
+    await router.push('/signin');
 
   } catch (error: unknown) {
     console.error("Backend Signup Component Error:", error);

@@ -208,10 +208,10 @@ const handleSubmit = async () => {
     console.log('Login successful, user role:', userRole)
     switch (userRole) {
       case Role.SUPER_ADMIN:
-        await router.push({ name: 'SuperAdminDashboard' })
+        await router.push({ name: 'Ecommerce' })
         break
       case Role.ADMIN:
-        await router.push({ name: 'SuperAdminDashboard' })
+        await router.push({ name: 'RiderProfile' })
         break
       case Role.RIDER:
       await router.push({ name: 'RiderProfile' })

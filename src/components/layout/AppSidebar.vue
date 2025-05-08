@@ -196,19 +196,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
 import { useRoute } from "vue-router";
+import type { Component } from 'vue';
 
 import {
   GridIcon,
-  CalenderIcon,
   UserCircleIcon,
   MailIcon,
   DocsIcon,
   PieChartIcon,
   ChevronDownIcon,
   HorizontalDots,
-  PageIcon,
   TableIcon,
   ListIcon,
   PlugInIcon,
@@ -216,12 +214,38 @@ import {
 import SidebarWidget from "./SidebarWidget.vue";
 import BoxCubeIcon from "@/icons/BoxCubeIcon.vue";
 import { useSidebar } from "@/composables/useSidebar";
+import {
+  ClipboardDocumentListIcon,
+  UserPlusIcon,
+  UsersIcon
+} from "@heroicons/vue/24/solid";
+
+// Define type for menu items
+interface SubMenuItem {
+  name: string;
+  path: string;
+  pro?: boolean;
+}
+
+// Use general Component type for icons
+interface MenuItem {
+  icon: Component;
+  name: string;
+  path?: string;
+  subItems?: SubMenuItem[];
+}
+
+interface MenuGroup {
+  title: string;
+  items: MenuItem[];
+}
 
 const route = useRoute();
 
 const { isExpanded, isMobileOpen, isHovered, openSubmenu } = useSidebar();
 
-const menuGroups = [
+// Apply the type to the menuGroups array
+const menuGroups: MenuGroup[] = [
   {
     title: "Menu",
     items: [
@@ -238,73 +262,11 @@ const menuGroups = [
       {
         icon: UserCircleIcon,
         name: "Riders",
-        path: "/riders",
-      },
-      {
-        icon: PlugInIcon,
-        name: "Purchase",
-        path: "/purchase",
-      },
-      {
-        icon: CalenderIcon,
-        name: "Calendar",
-        path: "/calendar",
-      },
-      {
-        name: "Forms",
-        icon: ListIcon,
-        subItems: [
-          { name: "Form Elements", path: "/form-elements", pro: false },
-        ],
-      },
-      {
-        name: "Tables",
-        icon: TableIcon,
-        subItems: [{ name: "Basic Tables", path: "/basic-tables", pro: false }],
-      },
-      {
-        name: "Pages",
-        icon: PageIcon,
-        subItems: [
-          { name: "Black Page", path: "/blank", pro: false },
-          { name: "404 Page", path: "/error-404", pro: false },
-        ],
+        path: "/admin/riders",
       },
     ],
   },
-  {
-    title: "Others",
-    items: [
-      {
-        icon: PieChartIcon,
-        name: "Charts",
-        subItems: [
-          { name: "Line Chart", path: "/line-chart", pro: false },
-          { name: "Bar Chart", path: "/bar-chart", pro: false },
-        ],
-      },
-      {
-        icon: BoxCubeIcon,
-        name: "Ui Elements",
-        subItems: [
-          { name: "Alerts", path: "/alerts", pro: false },
-          { name: "Avatars", path: "/avatars", pro: false },
-          { name: "Badge", path: "/badge", pro: false },
-          { name: "Buttons", path: "/buttons", pro: false },
-          { name: "Images", path: "/images", pro: false },
-          { name: "Videos", path: "/videos", pro: false },
-        ],
-      },
-      {
-        icon: PlugInIcon,
-        name: "Authentication",
-        subItems: [
-          { name: "Signin", path: "/signin", pro: false },
-          { name: "Signup", path: "/signup", pro: false },
-        ],
-      },
-    ],
-  },
+
   {
     title: "ADMIN",
     items: [
@@ -326,22 +288,22 @@ const menuGroups = [
       {
         icon: PieChartIcon,
         name: "System Analytics",
-        path: "/super-admin/analytics",
+        path: "/admin/analytics",
       },
       {
         icon: ListIcon,
         name: "Global Transactions",
-        path: "/super-admin/transactions",
+        path: "/admin/transactions",
       },
       {
         icon: BoxCubeIcon,
         name: "Product Management",
-        path: "/super-admin/products",
+        path: "/admin/products",
       },
       {
         icon: TableIcon,
         name: "Stats & Reports",
-        path: "/super-admin/stats-reports",
+        path: "/admin/stats-reports",
       },
     ],
   },
@@ -355,33 +317,42 @@ const menuGroups = [
       },
     ],
   },
+  {
+    title: "Management",
+    items: [
+      {
+        icon: ClipboardDocumentListIcon,
+        name: "Order History",
+        path: "/admin/orders",
+      },
+      {
+        icon: UserPlusIcon,
+        name: "Pending Approvals",
+        path: "/admin/registration-approval",
+      },
+      {
+        icon: UsersIcon,
+        name: "All Riders",
+        path: "/admin/riders",
+      },
+    ]
+  },
 ];
 
-const isActive = (path: string) => route.path === path;
-
-const toggleSubmenu = (groupIndex: number, itemIndex: number) => {
-  const key = `${groupIndex}-${itemIndex}`;
-  openSubmenu.value = openSubmenu.value === key ? null : key;
+// Helper function to check if a route is active
+const isActive = (path: string) => {
+  return route.path === path || (path !== '/' && route.path.startsWith(path));
 };
 
-const isAnySubmenuRouteActive = computed(() => {
-  return menuGroups.some((group) =>
-    group.items.some(
-      (item) =>
-        item.subItems && item.subItems.some((subItem) => isActive(subItem.path))
-    )
-  );
-});
-
+// Helper function to check if a submenu is open
 const isSubmenuOpen = (groupIndex: number, itemIndex: number) => {
-  const key = `${groupIndex}-${itemIndex}`;
-  return (
-    openSubmenu.value === key ||
-    (isAnySubmenuRouteActive.value &&
-      menuGroups[groupIndex].items[itemIndex].subItems?.some((subItem) =>
-        isActive(subItem.path)
-      ))
-  );
+  return openSubmenu.value === `${groupIndex}-${itemIndex}`;
+};
+
+// Function to toggle submenu
+const toggleSubmenu = (groupIndex: number, itemIndex: number) => {
+  const menuKey = `${groupIndex}-${itemIndex}`;
+  openSubmenu.value = openSubmenu.value === menuKey ? null : menuKey;
 };
 
 const startTransition = (el: Element) => {

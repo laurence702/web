@@ -4,16 +4,13 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { getMe } from '@/services/apiService'
 
-// Import mock users - adjust path as needed
-// import users from '@/mockData/users.json'
-
 // Define Role enum (Export if needed elsewhere, otherwise keep local)
 export enum Role {
   SUPER_ADMIN = 'super_admin',
   ADMIN = 'admin',
   RIDER = 'rider',
   USER = 'user',
-  UNKNOWN = 'unknown' // Added for robustness
+  UNKNOWN = 'unknown',
 }
 
 // type UserProfile removed as UserProfileData is imported and used
@@ -95,7 +92,7 @@ export const useAuthStore = defineStore('auth', () => {
           phone: apiUserData.phone,
           role: userRoleEnum, // Assign the enum member
           verification_status: apiUserData.verification_status,
-          branch_id: apiUserData.branch_id,
+          branch_id: apiUserData.branch_id !== null && apiUserData.branch_id !== undefined ? String(apiUserData.branch_id) : null,
           user_profile: apiUserData.user_profile,
           created_at: apiUserData.created_at,
           updated_at: apiUserData.updated_at,
@@ -137,7 +134,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function fetchProfile() {
       if (!token.value) {
-          // console.log('No token, cannot fetch profile.');
+          console.log('No token, cannot fetch profile.');
           // Optionally clear user state if token disappears unexpectedly
           // clearAuthData(); // Consider if this is desired behavior
           return;
@@ -181,17 +178,15 @@ export const useAuthStore = defineStore('auth', () => {
           // Removed redundant check here as it's handled above
       } finally {
           profileLoading.value = false;
-          // console.log('Finished fetching profile.');
       }
   }
 
-  // Initialize store from localStorage
+  // Initialize store from localStorage - ONLY load, don't fetch profile here
   async function loadAuthFromStorage(): Promise<void> {
     console.log('[AuthStore] Attempting to load auth from storage...');
     const storedToken = localStorage.getItem(AUTH_TOKEN_KEY);
     const storedUserString = localStorage.getItem(USER_DATA_KEY);
-    let userLoadedFromStorage = false;
-    let parsedUser: Record<string, unknown> | null = null; // Use Record<string, unknown> instead of any
+    let parsedUser: Record<string, unknown> | null = null;
 
     console.log('[AuthStore] Stored Token:', storedToken ? 'Exists' : 'Missing');
     console.log('[AuthStore] Stored User String:', storedUserString ? 'Exists' : 'Missing');
@@ -205,22 +200,19 @@ export const useAuthStore = defineStore('auth', () => {
           parsedUser = JSON.parse(storedUserString);
           console.log('[AuthStore] Parsed user from storage:', parsedUser);
 
-          // Ensure parsedUser is not null and is an object before checking properties
           if (parsedUser && typeof parsedUser === 'object') {
             const hasId = typeof parsedUser.id === 'string' && parsedUser.id !== '';
             const hasRole = typeof parsedUser.role === 'string' && parsedUser.role !== '';
             let roleString = '';
             let roleIsValid = false;
             if (hasRole) {
-                roleString = parsedUser.role as string; // Now safe to cast to string
+                roleString = parsedUser.role as string;
                 roleIsValid = isValidRole(roleString);
             }
             console.log(`[AuthStore] User Validation: hasId=${hasId}, hasRole=${hasRole}, roleString='${roleString}', roleIsValid=${roleIsValid}`);
 
             if (hasId && hasRole && roleIsValid) {
-              // Cast to unknown first, then to ApiUser
               setUserState(parsedUser as unknown as ApiUser);
-              userLoadedFromStorage = true;
               console.log('[AuthStore] User validation successful. Set from storage.');
             } else {
               console.warn('[AuthStore] Stored user data failed validation. Clearing user state.');
@@ -228,34 +220,30 @@ export const useAuthStore = defineStore('auth', () => {
               setUserStorage(null);
             }
           } else {
-              // Handle case where parsedUser is null or not an object after JSON.parse
               console.warn('[AuthStore] Parsed user data is null or not an object. Clearing user state.');
               setUserState(null);
               setUserStorage(null);
           }
         } catch (error) {
           console.error('[AuthStore] Failed to parse stored user data JSON:', error);
-          setUserState(null); // Clear potentially invalid user state
-          setUserStorage(null); // Remove invalid user from storage
+          setUserState(null);
+          setUserStorage(null);
         }
       }
 
-      // Fetch profile ONLY if token loaded but user wasn't successfully loaded/validated from storage
-      if (!userLoadedFromStorage) {
-          console.log('[AuthStore] Token loaded but user not loaded/invalid from storage. Fetching profile...');
-          await fetchProfile();
-      }
+      // *** DO NOT FETCH PROFILE HERE ***
+      // Let components or guards trigger fetchProfile if needed after initialization
+      // if (!userLoadedFromStorage) {
+      //     console.log('[AuthStore] Token loaded but user not loaded/invalid from storage. Fetching profile...');
+      //     await fetchProfile();
+      // }
 
     } else {
       console.log('[AuthStore] No token found in storage.');
-      // Ensure state is clear if no token
-      clearAuthData(false); // Keep user potentially loaded if token disappears strangely?
-                             // Or clearAuthData(true) if no token means definitely no user.
-                             // Let's clear fully: clearAuthData(true)
       clearAuthData(true);
     }
     isInitialized.value = true;
-    console.log('[AuthStore] Auth loading complete. Initialized:', isInitialized.value, 'Authenticated:', isAuthenticated.value);
+    console.log('[AuthStore] Auth loading complete. Initialized:', isInitialized.value, 'Token Exists:', !!token.value, 'User Exists:', !!currentUser.value);
   }
 
   // Initial load
@@ -264,14 +252,17 @@ export const useAuthStore = defineStore('auth', () => {
   // Login Action
   async function login(loginResponse: LoginResponse) {
     console.log('[AuthStore] login action called with response:', loginResponse);
-    setTokenState(loginResponse.access_token);
+    setTokenState(loginResponse.token);
     setUserState(loginResponse.user);
-    // Log currentUser immediately after setUserState
     console.log('[AuthStore] currentUser state after setUserState in login:', currentUser.value);
     console.log('[AuthStore] Computed userRole after setUserState in login:', userRole.value);
 
-    setTokenStorage(loginResponse.access_token);
-    setUserStorage(currentUser.value);
+    // --- TEMP: Disable localStorage saving ---
+    // setTokenStorage(loginResponse.token);
+    // setUserStorage(currentUser.value);
+    console.log('[AuthStore] TEMP: Skipped saving token/user to localStorage.');
+    // --- END TEMP ---
+
     profileError.value = null; // Clear any previous errors
   }
 

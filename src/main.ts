@@ -18,16 +18,13 @@ const pinia = createPinia()
 
 app.use(pinia)
 
-// --- Load Auth State --- 
 // Must be called AFTER app.use(pinia)
 const authStore = useAuthStore();
 try {
     authStore.loadAuthFromStorage();
 } catch (error) {
     console.error("Failed to load auth state from storage:", error);
-    // Handle potential errors during loading if necessary
 }
-// --- End Load Auth State ---
 
 app.use(router)
 app.use(VueApexCharts)

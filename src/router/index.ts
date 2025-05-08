@@ -21,7 +21,7 @@ const router = createRouter({
           component: () => import('../views/Ecommerce.vue'),
           meta: {
             title: 'Dashboard',
-            requiresAuth: false, // Keep specific auth requirements if needed
+            requiresAuth: true, // Keep specific auth requirements if needed
           },
         },
         {
@@ -30,7 +30,7 @@ const router = createRouter({
           component: () => import('../views/Others/Calendar.vue'),
           meta: {
             title: 'Calendar',
-            requiresAuth: false,
+            requiresAuth: true,
           },
         },
         {
@@ -39,7 +39,7 @@ const router = createRouter({
           component: () => import('../views/Others/UserProfile.vue'),
           meta: {
             title: 'Profile',
-            requiresAuth: false,
+            requiresAuth: true,
           },
         },
         {
@@ -48,7 +48,7 @@ const router = createRouter({
           component: () => import('../views/Forms/FormElements.vue'),
           meta: {
             title: 'Form Elements',
-            requiresAuth: false,
+            requiresAuth: true,
           },
         },
         {
@@ -57,20 +57,20 @@ const router = createRouter({
           component: () => import('../views/Tables/BasicTables.vue'),
           meta: {
             title: 'Basic Tables',
-            requiresAuth: false,
+            requiresAuth: true,
           },
         },
         {
           path: '/line-chart',
           name: 'Line Chart',
           component: () => import('../views/Chart/LineChart/LineChart.vue'),
-          meta: { requiresAuth: false },
+          meta: { requiresAuth: true },
         },
         {
           path: '/bar-chart',
           name: 'Bar Chart',
           component: () => import('../views/Chart/BarChart/BarChart.vue'),
-          meta: { requiresAuth: false },
+          meta: { requiresAuth: true },
         },
         {
           path: '/alerts',
@@ -78,7 +78,7 @@ const router = createRouter({
           component: () => import('../views/UiElements/Alerts.vue'),
           meta: {
             title: 'Alerts',
-            requiresAuth: false,
+            requiresAuth: true,
           },
         },
         {
@@ -87,7 +87,7 @@ const router = createRouter({
           component: () => import('../views/UiElements/Avatars.vue'),
           meta: {
             title: 'Avatars',
-            requiresAuth: false,
+            requiresAuth: true,
           },
         },
         {
@@ -96,7 +96,7 @@ const router = createRouter({
           component: () => import('../views/UiElements/Badges.vue'),
           meta: {
             title: 'Badge',
-            requiresAuth: false,
+            requiresAuth: true,
           },
         },
         {
@@ -105,7 +105,7 @@ const router = createRouter({
           component: () => import('../views/UiElements/Buttons.vue'),
           meta: {
             title: 'Buttons',
-            requiresAuth: false,
+            requiresAuth: true,
           },
         },
         {
@@ -114,7 +114,7 @@ const router = createRouter({
           component: () => import('../views/UiElements/Images.vue'),
           meta: {
             title: 'Images',
-            requiresAuth: false,
+            requiresAuth: true,
           },
         },
         {
@@ -123,7 +123,7 @@ const router = createRouter({
           component: () => import('../views/UiElements/Videos.vue'),
           meta: {
             title: 'Videos',
-            requiresAuth: false,
+            requiresAuth: true,
           },
         },
         {
@@ -132,80 +132,97 @@ const router = createRouter({
           component: () => import('../views/Pages/BlankPage.vue'),
           meta: {
             title: 'Blank',
-            requiresAuth: false,
+            requiresAuth: true,
           },
         },
         {
           path: '/payments',
           name: 'Payments',
           component: () => import('../views/PlaceholderPage.vue'),
-          meta: { title: 'Payments', requiresAuth: false },
+          meta: { title: 'Payments', requiresAuth: true },
         },
         {
           path: '/riders',
           name: 'Riders',
           component: () => import('../views/PlaceholderPage.vue'),
-          meta: { title: 'Riders', requiresAuth: false },
+          meta: { title: 'Riders', requiresAuth: true },
         },
         {
           path: '/purchase',
           name: 'Purchase',
           component: () => import('../views/PlaceholderPage.vue'),
-          meta: { title: 'Purchase', requiresAuth: false },
+          meta: { title: 'Purchase', requiresAuth: true },
+        },
+        {
+          path: '/admin/products',
+          name: 'ProductManagement',
+          component: () => import('../views/SuperAdmin/ProductManagement.vue'),
+          meta: { title: 'Product Management', requiresAuth: true }, // TODO: Add correct auth later
+        },
+        {
+          path: '/admin/orders',
+          name: 'OrderHistory',
+          component: () => import('../views/Admin/OrderHistory.vue'),
+          meta: {
+            title: 'Order History',
+            requiresAuth: true,
+            allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN]
+          }
         },
         {
           path: '/admin/registration-approval',
           name: 'RegistrationApproval',
-          component: () => import('../views/PlaceholderPage.vue'),
-          meta: { title: 'Registration Approval', requiresAuth: false },
+          component: () => import('../views/Admin/PendingRegistrations.vue'),
+          meta: {
+            title: 'Registration Approval',
+            requiresAuth: true,
+            allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN]
+          },
         },
         {
-          path: '/super-admin/stats-reports',
-          name: 'StatsReports',
-          component: () => import('../views/SuperAdmin/StatsReports.vue'),
-          meta: { title: 'Stats & Reports', requiresAuth: false },
-        },
-        {
-          path: '/super-admin/dashboard',
-          name: 'SuperAdminDashboard',
-          component: () => import('../views/SuperAdmin/Dashboard.vue'),
-          meta: { title: 'Super Admin Dashboard', requiresAuth: false },
-        },
-        {
-          path: '/super-admin/admins',
-          name: 'AdminManagement',
-          component: () => import('../views/SuperAdmin/AdminManagement.vue'),
-          meta: { title: 'Admin Management', requiresAuth: false },
-        },
-        {
-          path: '/super-admin/branches',
-          name: 'BranchOverview',
-          component: () => import('../views/SuperAdmin/BranchOverview.vue'),
-          meta: { title: 'Branch Overview', requiresAuth: false },
-        },
-        {
-          path: '/super-admin/analytics',
-          name: 'SystemAnalytics',
-          component: () => import('../views/SuperAdmin/SystemAnalytics.vue'),
-          meta: { title: 'System Analytics', requiresAuth: false },
-        },
-        {
-          path: '/super-admin/transactions',
-          name: 'GlobalTransactions',
-          component: () => import('../views/SuperAdmin/GlobalTransactions.vue'),
-          meta: { title: 'Global Transactions', requiresAuth: false },
-        },
-        {
-          path: '/super-admin/products',
-          name: 'ProductManagement',
-          component: () => import('../views/SuperAdmin/ProductManagement.vue'),
-          meta: { title: 'Product Management', requiresAuth: false },
+          path: '/admin/riders',
+          name: 'RiderList',
+          component: () => import('../views/Admin/RiderList.vue'),
+          meta: {
+            title: 'All Riders',
+            requiresAuth: true,
+          }
         },
         {
           path: '/rider/profile',
           name: 'RiderProfile',
           component: () => import('../views/Rider/Profile.vue'),
-          meta: { title: 'Rider Profile', requiresAuth: false, allowedRoles: ['rider'] } // TEMP: Unguarded for debugging
+          meta: { title: 'Rider Profile', requiresAuth: true, allowedRoles: ['rider','super_admin'] } // TEMP: Unguarded for debugging
+        },
+        {
+          path: '/admin/transactions',
+          name: 'GlobalTransactions',
+          component: () => import('../views/SuperAdmin/GlobalTransactions.vue'),
+          meta: { title: 'Global Transactions', requiresAuth: false }, // TODO: Add correct auth later
+        },
+        {
+          path: '/admin/admins',
+          name: 'SuperAdminAdmins',
+          component: () => import('../views/SuperAdmin/AdminManagement.vue'),
+          meta: { title: 'Admin Management', requiresAuth: true }, // TODO: Add correct auth later
+        },
+        {
+          path: '/super-admin/branches',
+          name: 'SuperAdminBranches',
+          component: () => import('../views/SuperAdmin/BranchOverview.vue'),
+          meta: { title: 'Branch Overview', requiresAuth: true }, // TODO: Add correct auth later
+        },
+        {
+          path: '/admin/analytics',
+          name: 'SuperAdminAnalytics',
+          component: () => import('../views/SuperAdmin/SystemAnalytics.vue'),
+          meta: { title: 'System Analytics', requiresAuth: true }, // TODO: Add correct auth later
+        },
+        {
+          path: '/admin/stats-reports',
+          name: 'SuperAdminStatsReports',
+          component: () => import('../views/SuperAdmin/StatsReports.vue'),
+          meta: { title: 'Stats & Reports', requiresAuth: true }, // TODO: Add correct auth later
         },
         // --- NESTED ROUTES END ---
       ]
@@ -235,20 +252,12 @@ const router = createRouter({
         title: 'Reset Password',
       },
     },
-    // --- Rider Auth Routes ---
-    {
-      path: '/rider/signin',
-      name: 'RiderSignin',
-      component: () => import('../views/Auth/RiderSignin.vue'),
-      meta: { title: 'Rider Signin' }
-    },
     {
       path: '/rider/signup',
       name: 'RiderSignup',
       component: () => import('../views/Auth/RiderSignup.vue'),
       meta: { title: 'Rider Signup' }
     },
-    // --- END Rider Auth Routes ---
     {
       path: '/error-404',
       name: '404 Error',
@@ -257,7 +266,7 @@ const router = createRouter({
         title: '404 Error',
       },
     },
-    { path: '/:pathMatch(.*)*', redirect: '/error-404' } // Catch-all should be last
+    { path: '/:pathMatch(.*)*', redirect: '/error-404' }
   ],
 })
 
@@ -265,7 +274,7 @@ router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
   const allowedRoles = to.meta.allowedRoles as Role[] | undefined
-  const publicPages = ['/signin', '/signup', '/password-reset', '/rider/signin', '/rider/signup']
+  const publicPages = ['/signin', '/signup', '/password-reset', '/rider/signup']
 
   if (!authStore.isInitialized) {
     await authStore.loadAuthFromStorage()
@@ -276,19 +285,23 @@ router.beforeEach(async (to, from, next) => {
   const currentRole = authStore.userRole
 
   if (requiresAuth) {
+    // Log the actual token value just before the check
+    console.log(`[Guard] Checking auth. Token value:`, authStore.token);
+    console.log(`[Guard] Checking auth. User value:`, authStore.currentUser);
+
+    // Check the raw token and currentUser refs directly
     if (!authStore.token || !authStore.currentUser) {
-      console.log(`Redirecting to login, requiresAuth=true, token exists=${!!authStore.token}, user exists=${!!authStore.currentUser}`);
-      next(to.path.startsWith('/rider/') ? '/rider/signin' : '/signin');
+      console.log(`[Guard] Redirecting to login, requiresAuth=true, token exists=${!!authStore.token}, user exists=${!!authStore.currentUser}`);
+      next('/signin');
     } else if (allowedRoles && (!currentRole || !allowedRoles.includes(currentRole))) {
       console.log(`Redirecting to dashboard, user role '${currentRole}' not in allowedRoles:`, allowedRoles);
       next('/');
     } else {
-      console.log('Allowing navigation to protected route, user authenticated and has role.')
       next()
     }
   } else if (authStore.isAuthenticated && publicPages.includes(to.path)) {
     console.log('Redirecting to dashboard, isAuthenticated=true, path is public auth page')
-    next(currentRole === Role.RIDER ? '/rider/profile' : '/')
+    next(currentRole === (Role.RIDER || Role.SUPER_ADMIN) ? '/rider/profile' : '/')
   } else {
     console.log('Allowing navigation to public route.')
     next()

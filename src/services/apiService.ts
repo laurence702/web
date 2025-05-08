@@ -16,6 +16,15 @@ export interface UserProfileData { // Export this
   current_debt?: number; // Added based on profile page usage
 }
 
+// Define Branch structure based on user object example
+interface BranchData {
+  id: number;
+  name: string;
+  location?: string;
+  branch_phone?: string;
+  // Add other fields if needed
+}
+
 export interface ApiUser {
   id: string;
   fullname: string;
@@ -23,8 +32,12 @@ export interface ApiUser {
   phone: string;
   role: string;
   verification_status: string;
-  branch_id: string | null;
+  branch_id: number | null; // Keep ID if needed, but use branch object primarily
+  branch: BranchData | null; // Add the nested branch object
   user_profile: UserProfileData | null;
+  // Include other fields from example if needed (e.g., balance, banned_at)
+  balance?: string;
+  banned_at?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -32,7 +45,7 @@ export interface ApiUser {
 // Define the expected structure of the successful login response
 export interface LoginResponse { // Export this
   message: string;
-  access_token: string;
+  token: string;
   token_type: string;
   user: ApiUser;
 }
@@ -47,7 +60,39 @@ export interface RiderRegistrationResponse { // Export this
 
 // Define the expected structure of the /me response
 interface GetMeResponse {
-  user: ApiUser; // Assuming endpoint returns the user object directly or nested
+  user: ApiUser;
+}
+
+// Define the structure for user list API response (adjust based on actual API)
+interface GetUsersResponse {
+  data: ApiUser[];
+  current_page: number;
+  last_page: number;
+  per_page: number;
+  total: number; 
+  // Add other pagination fields if provided by API (e.g., next_page_url)
+}
+
+// Define parameters for getUsers function
+interface GetUsersParams {
+  page?: number;
+  limit?: number;
+  role?: string; // To filter by role
+  verification_status?: string; // Add verification status filter
+  branchId?: string; // Optional filter
+  // Add other potential filter/sort params
+}
+
+// Define request body for verification update
+interface UpdateVerificationStatusRequest {
+    status: 'verified' | 'rejected';
+    rider_id: string;
+}
+
+// Define response (adjust based on actual API response)
+interface UpdateVerificationStatusResponse {
+    message: string;
+    // Include other fields if the API returns more data
 }
 
 // Read Base URL from environment variable
@@ -74,9 +119,9 @@ export async function loginUser(login_identifier: string, password: string): Pro
     body: JSON.stringify({ login_identifier, password }),
   });
 
-  // We expect JSON, even for errors potentially
   let data;
   try {
+    console.log('IIIIIIII', response);
       data = await response.json();
   } catch {
       // Handle cases where the response is not JSON (e.g., server error pages)
@@ -175,6 +220,98 @@ export async function getMe(token: string): Promise<GetMeResponse> {
         return { user: data as ApiUser };
    }
 
+}
+
+/**
+ * Fetches a list of users from the API, with optional filtering and pagination.
+ * @param {string} token - The authentication token.
+ * @param {GetUsersParams} params - Parameters for filtering and pagination.
+ * @returns {Promise<GetUsersResponse>} - The user list response.
+ * @throws {Error} - Throws error on network failure or non-ok response.
+ */
+export async function getUsers(token: string, params: GetUsersParams = {}): Promise<GetUsersResponse> {
+  if (!token) {
+    throw new Error("Authentication token is missing.");
+  }
+
+  // Construct query parameters
+  const queryParams = new URLSearchParams();
+  if (params.page) queryParams.append('page', params.page.toString());
+  if (params.limit) queryParams.append('limit', params.limit.toString());
+  if (params.role) queryParams.append('role', params.role);
+  if (params.verification_status) queryParams.append('verification_status', params.verification_status); // Add status param
+  if (params.branchId) queryParams.append('branch_id', params.branchId);
+  // Add other params as needed
+
+  const queryString = queryParams.toString();
+  const url = `${BASE_URL}/users${queryString ? '?' + queryString : ''}`;
+  console.log('[apiService] Fetching users from:', url);
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  let data;
+  try {
+      data = await response.json();
+  } catch {
+      throw new Error(`Failed to parse user list response. Status: ${response.status}`);
+  }
+
+  if (!response.ok) {
+    console.error("GetUsers API Error Response:", data);
+    throw new Error(data.message || `Failed to fetch users. Status: ${response.status}`);
+  }
+
+  // Add runtime validation if necessary
+  return data as GetUsersResponse;
+}
+
+/**
+ * Updates the verification status of a rider.
+ * @param {string} token - The authentication token.
+ * @param {UpdateVerificationStatusRequest} payload - The request body containing rider_id and status.
+ * @returns {Promise<UpdateVerificationStatusResponse>} - The response from the API.
+ * @throws {Error} - Throws error on network failure or non-ok response.
+ */
+export async function updateRiderVerificationStatus(
+    token: string,
+    payload: UpdateVerificationStatusRequest
+): Promise<UpdateVerificationStatusResponse> {
+    if (!token) {
+        throw new Error("Authentication token is missing.");
+    }
+
+    const url = `${BASE_URL}/riders/verification`;
+    console.log('[apiService] Updating rider verification status:', url, payload);
+
+    const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+    });
+
+    let data;
+    try {
+        data = await response.json();
+    } catch {
+        throw new Error(`Failed to parse verification update response. Status: ${response.status}`);
+    }
+
+    if (!response.ok) {
+        console.error("UpdateVerificationStatus API Error Response:", data);
+        throw new Error(data.message || `Failed to update verification status. Status: ${response.status}`);
+    }
+
+    return data as UpdateVerificationStatusResponse;
 }
 
 // Add other API functions here as needed (e.g., registerUser, fetchUserData) 

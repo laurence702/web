@@ -144,7 +144,6 @@ const recentActivity = ref([
                 <dd class="mt-1 text-sm text-gray-900">{{ authStore.currentUser.user_profile?.vehicle_type || 'Not Provided' }}</dd>
               </div>
               <div>
-                <dt class="text-sm font-medium text-gray-500">Generate QR Code</dt>
                   <!-- Generate QR Code Button -->
                   <button
                     @click="openQrModal"
@@ -185,7 +184,7 @@ const recentActivity = ref([
 
     <!-- QR Code Modal -->
     <BaseModal v-model="isQrModalVisible" max-width="max-w-xl">
-      <template #title>
+      <template #QRCode>
         <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">
           Rider Identification QR Code
         </h3>

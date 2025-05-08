@@ -186,6 +186,7 @@ const router = createRouter({
           meta: {
             title: 'All Riders',
             requiresAuth: true,
+            allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN]
           }
         },
         {

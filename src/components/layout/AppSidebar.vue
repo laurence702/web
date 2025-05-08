@@ -50,7 +50,7 @@
     >
       <nav class="mb-6">
         <div class="flex flex-col gap-4">
-          <div v-for="(menuGroup, groupIndex) in menuGroups" :key="groupIndex">
+          <div v-for="(menuGroup, groupIndex) in filteredMenuGroups" :key="groupIndex">
             <h2
               :class="[
                 'mb-4 text-xs uppercase flex leading-[20px] text-gray-400',
@@ -198,10 +198,11 @@
 <script setup lang="ts">
 import { useRoute } from "vue-router";
 import type { Component } from 'vue';
+import { computed } from 'vue';
+import { useAuthStore, Role } from '@/stores/auth';
 
 import {
   GridIcon,
-  UserCircleIcon,
   MailIcon,
   DocsIcon,
   PieChartIcon,
@@ -209,7 +210,6 @@ import {
   HorizontalDots,
   TableIcon,
   ListIcon,
-  PlugInIcon,
 } from "../../icons";
 import SidebarWidget from "./SidebarWidget.vue";
 import BoxCubeIcon from "@/icons/BoxCubeIcon.vue";
@@ -217,139 +217,170 @@ import { useSidebar } from "@/composables/useSidebar";
 import {
   ClipboardDocumentListIcon,
   UserPlusIcon,
-  UsersIcon
+  UsersIcon,
+  UserCircleIcon as SolidUserCircleIcon
 } from "@heroicons/vue/24/solid";
 
-// Define type for menu items
 interface SubMenuItem {
   name: string;
   path: string;
   pro?: boolean;
+  allowedRoles?: Role[];
 }
 
-// Use general Component type for icons
 interface MenuItem {
   icon: Component;
   name: string;
   path?: string;
   subItems?: SubMenuItem[];
+  allowedRoles?: Role[];
 }
 
 interface MenuGroup {
   title: string;
   items: MenuItem[];
+  allowedRoles?: Role[];
 }
 
 const route = useRoute();
-
+const authStore = useAuthStore();
 const { isExpanded, isMobileOpen, isHovered, openSubmenu } = useSidebar();
 
-// Apply the type to the menuGroups array
-const menuGroups: MenuGroup[] = [
+const allMenuGroups: MenuGroup[] = [
   {
     title: "Menu",
+    allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN],
     items: [
       {
         icon: GridIcon,
         name: "Dashboard",
         path: "/",
+        allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN],
       },
       {
-        icon: MailIcon,
-        name: "Payments",
-        path: "/payments",
-      },
-      {
-        icon: UserCircleIcon,
+        icon: UsersIcon,
         name: "Riders",
         path: "/admin/riders",
+        allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN],
       },
     ],
   },
 
   {
     title: "ADMIN",
+    allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN],
     items: [
       {
         icon: DocsIcon,
         name: "Registration Approval",
         path: "/admin/registration-approval",
+        allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN],
       },
       {
-        icon: UserCircleIcon,
+        icon: SolidUserCircleIcon,
         name: "Admin Management",
         path: "/super-admin/admins",
+        allowedRoles: [Role.SUPER_ADMIN],
       },
       {
         icon: PieChartIcon,
         name: "Branch Overview",
         path: "/super-admin/branches",
+        allowedRoles: [Role.SUPER_ADMIN],
       },
       {
         icon: PieChartIcon,
         name: "System Analytics",
-        path: "/admin/analytics",
+        path: "/super-admin/analytics",
+        allowedRoles: [Role.SUPER_ADMIN],
       },
       {
         icon: ListIcon,
         name: "Global Transactions",
-        path: "/admin/transactions",
+        path: "/super-admin/transactions",
+        allowedRoles: [Role.SUPER_ADMIN],
       },
       {
         icon: BoxCubeIcon,
         name: "Product Management",
-        path: "/admin/products",
+        path: "/super-admin/products",
+        allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN],
       },
       {
         icon: TableIcon,
         name: "Stats & Reports",
-        path: "/admin/stats-reports",
+        path: "/super-admin/stats-reports",
+        allowedRoles: [Role.SUPER_ADMIN],
       },
     ],
   },
   {
     title: "RIDER",
+    allowedRoles: [Role.RIDER],
     items: [
       {
-        icon: UserCircleIcon,
+        icon: SolidUserCircleIcon,
         name: "My Profile",
         path: "/rider/profile",
+        allowedRoles: [Role.RIDER],
+      },
+      {
+        icon: ClipboardDocumentListIcon,
+        name: "Order History",
+        path: "/admin/orders",
+        allowedRoles: [Role.RIDER, Role.ADMIN, Role.SUPER_ADMIN],
       },
     ],
   },
   {
     title: "Management",
+    allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN],
     items: [
       {
         icon: ClipboardDocumentListIcon,
         name: "Order History",
         path: "/admin/orders",
+        allowedRoles: [Role.RIDER, Role.ADMIN, Role.SUPER_ADMIN],
       },
       {
         icon: UserPlusIcon,
         name: "Pending Approvals",
         path: "/admin/registration-approval",
+        allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN],
       },
       {
         icon: UsersIcon,
         name: "All Riders",
         path: "/admin/riders",
+        allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN],
       },
     ]
   },
 ];
 
-// Helper function to check if a route is active
+const filteredMenuGroups = computed(() => {
+  const currentRole = authStore.userRole;
+  if (!currentRole || !authStore.isAuthenticated) {
+    return [];
+  }
+
+  return allMenuGroups
+    .filter(group => group.allowedRoles?.includes(currentRole))
+    .map(group => ({
+      ...group,
+      items: group.items.filter(item => item.allowedRoles?.includes(currentRole))
+    }))
+    .filter(group => group.items.length > 0);
+});
+
 const isActive = (path: string) => {
   return route.path === path || (path !== '/' && route.path.startsWith(path));
 };
 
-// Helper function to check if a submenu is open
 const isSubmenuOpen = (groupIndex: number, itemIndex: number) => {
   return openSubmenu.value === `${groupIndex}-${itemIndex}`;
 };
 
-// Function to toggle submenu
 const toggleSubmenu = (groupIndex: number, itemIndex: number) => {
   const menuKey = `${groupIndex}-${itemIndex}`;
   openSubmenu.value = openSubmenu.value === menuKey ? null : menuKey;

@@ -1,92 +1,154 @@
-<script setup lang="ts" name="RiderProfile"> // Set component name
-import { computed, ref } from 'vue';
+<script setup lang="ts" name="RiderProfile">
+import { computed, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import { CheckCircleIcon, XCircleIcon } from '@heroicons/vue/24/solid'; // Import icons
+import { getUserById } from '@/services/apiService'; // Import new service
+import type { ApiUser } from '@/services/apiService'; // Removed UserProfileData import
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/vue/24/solid';
 import QrcodeVue from 'qrcode.vue';
-import BaseCard from '@/components/common/BaseCard.vue'; // Import BaseCard
-import BaseModal from '@/components/common/BaseModal.vue'; // Import BaseModal
+import BaseCard from '@/components/common/BaseCard.vue';
+import BaseModal from '@/components/common/BaseModal.vue';
 import DefaultAvatar from '@/assets/images/default_avatar.png';
 
-const authStore = useAuthStore();
+const authStore = useAuthStore(); // Still needed for token, and potentially for fallback/own profile view
+const route = useRoute();
 
-// --- Modal State ---
+// --- State for the viewed rider's profile ---
+const viewedRider = ref<ApiUser | null>(null);
+const pageLoading = ref(false);
+const pageError = ref<string | null>(null);
+
+
+// --- Modal State (remains the same) ---
 const isQrModalVisible = ref(false);
 
 const openQrModal = () => {
-  console.log('[Profile.vue] openQrModal function called'); // <-- Log function entry
   isQrModalVisible.value = true;
-  console.log('[Profile.vue] isQrModalVisible set to:', isQrModalVisible.value); // <-- Log state change
 };
 
 const closeQrModal = () => {
   isQrModalVisible.value = false;
 };
 
-// --- Computed Properties --- Accessing store data safely
+// --- Fetch Rider Data ---
+const fetchRiderData = async (riderId: string) => {
+  if (!authStore.token) {
+    pageError.value = "Authentication token not found.";
+    pageLoading.value = false;
+    return;
+  }
+  pageLoading.value = true;
+  pageError.value = null;
+  viewedRider.value = null; // Clear previous rider data
+
+  try {
+    const response = await getUserById(authStore.token, riderId);
+    if (response.user) {
+      viewedRider.value = response.user;
+    } else {
+      pageError.value = "Rider data not found in API response.";
+    }
+  } catch (err: unknown) {
+    console.error(`Failed to fetch rider profile for ID ${riderId}:`, err);
+    pageError.value = err instanceof Error ? err.message : `An unknown error occurred while fetching rider ID ${riderId}.`;
+    viewedRider.value = null;
+  } finally {
+    pageLoading.value = false;
+  }
+};
+
+// --- Computed Properties (updated to use viewedRider) ---
 
 const profilePictureUrl = computed(() => {
-  return authStore.currentUser?.user_profile?.profile_pic_url || DefaultAvatar;
+  return viewedRider.value?.user_profile?.profile_pic_url || DefaultAvatar;
 });
 
 const qrCodeData = computed(() => {
-  if (authStore.currentUser?.id) {
+  // Use viewedRider's ID for the QR code
+  if (viewedRider.value?.id) {
     const baseUrl = window.location.origin;
-    return `${baseUrl}/rider/profile/${authStore.currentUser.id}`;
+    // Construct the URL based on the current route, but ensure it points to this specific rider's ID.
+    // This assumes the route for RiderProfile is something like /rider/profile/:id or similar.
+    // If the QR code is meant to link to a generic profile page that then uses the ID, this is fine.
+    return `${baseUrl}/rider/profile/${viewedRider.value.id}`;
   }
-  return 'Error: Rider ID not found';
+  return 'Error: Rider ID not found for QR Code';
 });
 
 const totalPickups = computed(() => {
-  return authStore.currentUser?.user_profile?.total_pickups ?? 0; // Use nullish coalescing for numbers
+  return viewedRider.value?.user_profile?.total_pickups ?? 0;
 });
 
 const currentDebt = computed(() => {
-  return authStore.currentUser?.user_profile?.current_debt ?? 0;
+  return viewedRider.value?.user_profile?.current_debt ?? 0;
 });
 
 const isEligible = computed(() => {
+  if (!viewedRider.value) return false;
   return (
-    authStore.currentUser?.verification_status === 'verified' &&
-    (authStore.currentUser?.user_profile?.current_debt ?? 0) <= 0
+    viewedRider.value.verification_status === 'verified' &&
+    (viewedRider.value.user_profile?.current_debt ?? 0) <= 0
   );
 });
 
 const eligibilityMessage = computed(() => {
-  if (authStore.currentUser?.verification_status !== 'verified') {
+  if (!viewedRider.value) return 'Rider data not loaded.';
+  if (viewedRider.value.verification_status !== 'verified') {
     return 'Account not verified';
   }
-  if ((authStore.currentUser?.user_profile?.current_debt ?? 0) > 0) {
+  if ((viewedRider.value.user_profile?.current_debt ?? 0) > 0) {
     return 'Outstanding debt';
   }
   return 'Eligible for pickups';
 });
 
-// Mock data - replace later
+// Mock data - replace later (remains the same)
 const recentActivity = ref([
   { id: 1, type: 'Pickup', details: 'Completed pickup #12345', date: '2023-10-26' },
   { id: 2, type: 'Payment', details: 'Made payment of ₦5000', date: '2023-10-25' },
 ]);
+
+
+// --- Watch for route changes and fetch data ---
+watch(
+  () => route.params.id,
+  async (newId) => {
+    if (newId && typeof newId === 'string') {
+      await fetchRiderData(newId);
+    } else if (newId) {
+      // If the logged-in user is a rider and no ID is in params, show their own profile.
+      // This part depends on whether the /rider/profile route can be accessed without an ID.
+      // For now, strictly require an ID.
+      pageError.value = "Rider ID missing or invalid in URL.";
+      viewedRider.value = null;
+    }
+    // If no ID, and it's not the rider's own profile page (if that's a feature), clear/show error.
+  },
+  { immediate: true } // Fetch data immediately when component is created
+);
+
+// onMounted is effectively replaced by the immediate watcher on route.params.id
 
 </script>
 
 <template>
   <div>
     <!-- Loading State -->
-    <div v-if="authStore.profileLoading" class="text-center p-8 text-gray-600">
+    <div v-if="pageLoading" class="text-center p-8 text-gray-600">
       <svg class="animate-spin h-8 w-8 text-blue-500 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
       </svg>
-      Loading profile data...
+      Loading rider profile data...
     </div>
 
     <!-- Error State -->
-    <div v-else-if="authStore.profileError" class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800" role="alert">
-      <span class="font-medium">Error!</span> {{ authStore.profileError }}
+    <div v-else-if="pageError" class="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800" role="alert">
+      <span class="font-medium">Error!</span> {{ pageError }}
     </div>
 
     <!-- Profile Content -->
-    <div v-else-if="authStore.currentUser" class="space-y-6">
+    <div v-else-if="viewedRider" class="space-y-6">
       <!-- Eligibility Banner -->
       <div
         :class="[
@@ -108,11 +170,18 @@ const recentActivity = ref([
             class="h-32 w-32 rounded-full object-cover border-4 border-gray-200 shadow-md"
             @error="(event: Event) => (event.target as HTMLImageElement).src = DefaultAvatar"
           />
-          <h2 class="text-xl font-bold text-gray-800 mt-2">{{ authStore.currentUser.fullname }}</h2>
-          <p class="text-gray-500 text-sm">{{ authStore.currentUser.email }}</p>
-          <p class="text-gray-500 text-sm">{{ authStore.currentUser.phone }}</p>
+          <h2 class="text-xl font-bold text-gray-800 mt-2">{{ viewedRider.fullname }}</h2>
+          <p class="text-gray-500 text-sm">{{ viewedRider.email }}</p>
+          <p class="text-gray-500 text-sm">{{ viewedRider.phone }}</p>
 
-        
+          <!-- Generate QR Code Button -->
+          <button
+            @click="openQrModal"
+            class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            :disabled="!viewedRider.id"
+          >
+            Generate Identification QR Code
+          </button>
         </BaseCard>
 
         <!-- Right Column: Details & Activity -->
@@ -123,7 +192,7 @@ const recentActivity = ref([
             <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
               <div>
                 <dt class="text-sm font-medium text-gray-500">Verification Status</dt>
-                <dd class="mt-1 text-sm text-gray-900 capitalize">{{ authStore.currentUser.verification_status }}</dd>
+                <dd class="mt-1 text-sm text-gray-900 capitalize">{{ viewedRider.verification_status }}</dd>
               </div>
               <div>
                 <dt class="text-sm font-medium text-gray-500">Total Pickups</dt>
@@ -137,21 +206,27 @@ const recentActivity = ref([
               </div>
               <div>
                 <dt class="text-sm font-medium text-gray-500">Address</dt>
-                <dd class="mt-1 text-sm text-gray-900">{{ authStore.currentUser.user_profile?.address || 'Not Provided' }}</dd>
+                <dd class="mt-1 text-sm text-gray-900">{{ viewedRider.user_profile?.address || 'Not Provided' }}</dd>
               </div>
               <div>
                 <dt class="text-sm font-medium text-gray-500">Vehicle Type</dt>
-                <dd class="mt-1 text-sm text-gray-900">{{ authStore.currentUser.user_profile?.vehicle_type || 'Not Provided' }}</dd>
+                <dd class="mt-1 text-sm text-gray-900">{{ viewedRider.user_profile?.vehicle_type || 'Not Provided' }}</dd>
               </div>
               <div>
-                  <!-- Generate QR Code Button -->
-                  <button
-                    @click="openQrModal"
-                    class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                  >
-                    Generate Identification QR Code
-                  </button>
-                
+                <dt class="text-sm font-medium text-gray-500">NIN</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ viewedRider.user_profile?.nin || 'Not Provided' }}</dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Guarantor's Name</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ viewedRider.user_profile?.guarantors_name || 'Not Provided' }}</dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Guarantor's Phone</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ viewedRider.user_profile?.guarantors_phone || 'Not Provided' }}</dd>
+              </div>
+              <div>
+                <dt class="text-sm font-medium text-gray-500">Guarantor's Address</dt>
+                <dd class="mt-1 text-sm text-gray-900">{{ viewedRider.user_profile?.guarantors_address || 'Not Provided' }}</dd>
               </div>
                <!-- Add more profile fields as needed -->
             </dl>
@@ -177,14 +252,14 @@ const recentActivity = ref([
       </div>
     </div>
 
-    <!-- Fallback if user data couldn't be loaded -->
+    <!-- Fallback if user data couldn't be loaded and not loading/no error -->
     <div v-else class="text-center p-8 text-gray-500">
-       Rider profile data is not available.
+       Rider profile data is not available or ID is missing.
     </div>
 
     <!-- QR Code Modal -->
     <BaseModal v-model="isQrModalVisible" max-width="max-w-xl">
-      <template #QRCode>
+      <template #title>
         <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">
           Rider Identification QR Code
         </h3>

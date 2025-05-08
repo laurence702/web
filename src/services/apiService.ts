@@ -63,6 +63,11 @@ interface GetMeResponse {
   user: ApiUser;
 }
 
+// Define the expected structure of the /users/{id} response
+export interface GetUserByIdResponse { // New interface
+  user: ApiUser;
+}
+
 // Define the structure for user list API response (adjust based on actual API)
 interface GetUsersResponse {
   data: ApiUser[];
@@ -220,6 +225,55 @@ export async function getMe(token: string): Promise<GetMeResponse> {
         return { user: data as ApiUser };
    }
 
+}
+
+/**
+ * Fetches a specific user by their ID.
+ * @param {string} token - The authentication token.
+ * @param {string} userId - The ID of the user to fetch.
+ * @returns {Promise<GetUserByIdResponse>} - The user data response.
+ * @throws {Error} - Throws error on network failure or non-ok response.
+ */
+export async function getUserById(token: string, userId: string): Promise<GetUserByIdResponse> {
+  if (!token) {
+    throw new Error("Authentication token is missing.");
+  }
+  if (!userId) {
+    throw new Error("User ID is missing.");
+  }
+
+  const response = await fetch(`${BASE_URL}/users/${userId}`, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  let data;
+  try {
+      data = await response.json();
+  } catch (e) {
+      console.error("Error parsing getUserById response JSON:", e, "Status:", response.status);
+      throw new Error(`Failed to parse response for user ${userId}. Status: ${response.status}`);
+  }
+
+  if (!response.ok) {
+    console.error(`GetUserById API Error for user ${userId}:`, data);
+    throw new Error(data?.message || `Request for user ${userId} failed. Status: ${response.status}`);
+  }
+
+  // Assuming the response directly contains the user object or { user: ApiUser }
+  // This handles both { user: {...} } and cases where the API returns the user object directly at the root
+  if (data && data.user && typeof data.user === 'object') {
+      return data as GetUserByIdResponse;
+  } else if (data && typeof data === 'object' && data.id) { // Check if data itself is an ApiUser
+      return { user: data as ApiUser };
+  } else {
+    // If the structure is unexpected, log and throw an error
+    console.error("Unexpected response structure for getUserById:", data);
+    throw new Error("Unexpected response structure from server.");
+  }
 }
 
 /**

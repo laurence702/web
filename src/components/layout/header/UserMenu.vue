@@ -8,7 +8,7 @@
         <img src="/images/user/owner.jpg" alt="User" />
       </span>
 
-      <span class="block mr-1 font-medium text-theme-sm">Admin Prince </span>
+      <span class="block mr-1 font-medium text-theme-sm"> {{ userName }} </span>
 
       <ChevronDownIcon :class="{ 'rotate-180': dropdownOpen }" />
     </button>
@@ -57,11 +57,12 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { UserCircleIcon, ChevronDownIcon, LogoutIcon, SettingsIcon, InfoCircleIcon } from '@/icons'
 import { RouterLink } from 'vue-router'
+import type { ApiUser } from '@/services/apiService'
 import { useAuthStore } from '@/stores/auth'
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 
 const dropdownOpen = ref(false)
 const dropdownRef = ref(null)
@@ -71,6 +72,16 @@ const menuItems = [
   { href: '/chat', icon: SettingsIcon, text: 'Account settings' },
   { href: '/profile', icon: InfoCircleIcon, text: 'Support' },
 ]
+
+const currentUser = ref<ApiUser | null>(null);
+
+const userName = computed(() => {
+  if (currentUser.value) {
+    return currentUser.value.fullname;
+  }
+  return authStore.currentUser?.fullname;
+});
+
 
 const toggleDropdown = () => {
   dropdownOpen.value = !dropdownOpen.value

@@ -136,12 +136,6 @@ const router = createRouter({
           },
         },
         {
-          path: '/payments',
-          name: 'Payments',
-          component: () => import('../views/PlaceholderPage.vue'),
-          meta: { title: 'Payments', requiresAuth: true },
-        },
-        {
           path: '/riders',
           name: 'Riders',
           component: () => import('../views/PlaceholderPage.vue'),

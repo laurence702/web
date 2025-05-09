@@ -203,7 +203,6 @@ import { useAuthStore, Role } from '@/stores/auth';
 
 import {
   GridIcon,
-  MailIcon,
   DocsIcon,
   PieChartIcon,
   ChevronDownIcon,

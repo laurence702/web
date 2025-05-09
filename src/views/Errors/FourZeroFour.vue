@@ -40,7 +40,7 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts">
 import { ref } from "vue";
 import CommonGridShape from "../../components/common/CommonGridShape.vue";
 

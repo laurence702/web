@@ -52,11 +52,21 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import type { PropType } from 'vue';
+import type { RouteLocationRaw } from 'vue-router';
 import vClickOutside from './v-click-outside.vue'
+
+// Define interface for menu items
+interface DropdownItem {
+  label: string;
+  to?: RouteLocationRaw;
+  onClick?: () => void;
+  // Add any other properties item might have, e.g., icon, disabled, etc.
+}
 
 const props = defineProps({
   menuItems: {
-    type: Array,
+    type: Array as PropType<DropdownItem[]>,
     default: () => [],
   },
   buttonClass: {

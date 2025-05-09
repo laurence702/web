@@ -98,8 +98,8 @@ const signOut = () => {
   closeDropdown()
 }
 
-const handleClickOutside = (event) => {
-  if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
+const handleClickOutside = (event: MouseEvent) => {
+  if (dropdownRef.value && !(dropdownRef.value as HTMLElement).contains(event.target as Node)) {
     closeDropdown()
   }
 }

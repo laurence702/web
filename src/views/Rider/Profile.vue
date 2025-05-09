@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <script setup lang="ts" name="RiderProfile">
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';

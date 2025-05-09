@@ -1,5 +1,4 @@
 <template>
-  <AdminLayout>
     <PageBreadcrumb :pageTitle="currentPageTitle" />
     <div className="space-y-5 sm:space-y-6">
       <ComponentCard title="Success Alert">
@@ -67,10 +66,9 @@
         />
       </ComponentCard>
     </div>
-  </AdminLayout>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import AdminLayout from '@/components/layout/AdminLayout.vue'

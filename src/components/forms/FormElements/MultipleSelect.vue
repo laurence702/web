@@ -107,7 +107,7 @@
 import { ref, onMounted, onBeforeUnmount, defineProps, defineEmits, type PropType } from 'vue'
 
 interface OptionItem {
-  value: unknown;
+  value: PropertyKey;
   label?: string;
 }
 

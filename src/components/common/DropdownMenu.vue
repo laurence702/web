@@ -22,7 +22,7 @@
     </button>
 
     <!-- Dropdown Menu -->
-    <div v-if="open" :class="menuClass">
+    <div v-if="dropdownOpen" :class="menuClass">
       <slot name="menu">
         <!-- Default menu items -->
         <template v-for="(item, index) in menuItems">
@@ -64,7 +64,9 @@ interface DropdownItem {
   // Add any other properties item might have, e.g., icon, disabled, etc.
 }
 
-const props = defineProps({
+const dropdownOpen = ref(false)
+
+defineProps({
   menuItems: {
     type: Array as PropType<DropdownItem[]>,
     default: () => [],
@@ -85,14 +87,12 @@ const props = defineProps({
   },
 })
 
-const open = ref(false)
-
 const toggleDropdown = () => {
-  open.value = !open.value
+  dropdownOpen.value = !dropdownOpen.value
 }
 
 const closeDropdown = () => {
-  open.value = false
+  dropdownOpen.value = false
 }
 
 const handleMenuItemClick = (callback?: () => void) => {

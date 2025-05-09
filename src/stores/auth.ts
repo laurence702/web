@@ -142,14 +142,12 @@ export const useAuthStore = defineStore('auth', () => {
 
       profileLoading.value = true;
       profileError.value = null;
-      // console.log('Fetching profile with token:', token.value);
 
       try {
-          const response = await getMe(token.value); // Pass the token value
-          // console.log('Profile data received:', response);
+          const response = await getMe(token.value);
           if (response.user) {
              setUserState(response.user);
-             setUserStorage(currentUser.value); // Update localStorage with fresh data
+             setUserStorage(currentUser.value);
           } else {
               // Handle case where API returns success but no user data (shouldn't happen with /me ideally)
               console.error('Profile fetch successful but no user data returned.');
@@ -159,7 +157,6 @@ export const useAuthStore = defineStore('auth', () => {
           }
       } catch (error: unknown) { // Change type from any to unknown
           console.error('Error fetching profile:', error);
-          // Check if error is an instance of Error to safely access message
           if (error instanceof Error) {
             profileError.value = error.message;
             // Check for specific HTTP error details if available (example assumes Axios-like error structure)
@@ -257,13 +254,9 @@ export const useAuthStore = defineStore('auth', () => {
     console.log('[AuthStore] currentUser state after setUserState in login:', currentUser.value);
     console.log('[AuthStore] Computed userRole after setUserState in login:', userRole.value);
 
-    // --- TEMP: Disable localStorage saving ---
-    // setTokenStorage(loginResponse.token);
-    // setUserStorage(currentUser.value);
-    console.log('[AuthStore] TEMP: Skipped saving token/user to localStorage.');
-    // --- END TEMP ---
-
-    profileError.value = null; // Clear any previous errors
+    setTokenStorage(loginResponse.token);
+    setUserStorage(currentUser.value);
+    profileError.value = null;
   }
 
   // Logout Action

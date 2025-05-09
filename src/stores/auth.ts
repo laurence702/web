@@ -272,8 +272,7 @@ export const useAuthStore = defineStore('auth', () => {
     setUserState(registrationResponse.user);
     setTokenStorage(registrationResponse.access_token);
     setUserStorage(currentUser.value);
-    profileError.value = null; // Clear any previous errors
-    // No need to fetch profile again, data is fresh from registration response
+    profileError.value = null;
   }
 
   // Getters / Computed properties

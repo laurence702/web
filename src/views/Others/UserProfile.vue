@@ -1,5 +1,4 @@
 <template>
-  <admin-layout>
     <PageBreadcrumb :pageTitle="currentPageTitle" />
 
     <div
@@ -10,11 +9,9 @@
       <personal-info-card />
       <address-card />
     </div>
-  </admin-layout>
 </template>
 
-<script setup>
-import AdminLayout from '../../components/layout/AdminLayout.vue'
+<script setup lang="ts">
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import { ref } from 'vue'
 import ProfileCard from '../../components/profile/ProfileCard.vue'

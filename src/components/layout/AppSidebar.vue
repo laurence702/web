@@ -217,7 +217,8 @@ import {
   ClipboardDocumentListIcon,
   UserPlusIcon,
   UsersIcon,
-  UserCircleIcon as SolidUserCircleIcon
+  UserCircleIcon as SolidUserCircleIcon,
+  QrCodeIcon
 } from "@heroicons/vue/24/solid";
 
 interface SubMenuItem {
@@ -352,6 +353,42 @@ const allMenuGroups: MenuGroup[] = [
         name: "All Riders",
         path: "/admin/riders",
         allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN],
+      },
+    ]
+  },
+  {
+    title: "BRANCH ADMIN",
+    allowedRoles: [Role.ADMIN],
+    items: [
+      {
+        icon: GridIcon,
+        name: "Branch Dashboard",
+        path: "/branch-admin",
+        allowedRoles: [Role.ADMIN],
+      },
+      {
+        icon: QrCodeIcon,
+        name: "QR Scanner",
+        path: "/branch-admin/qr-scanner",
+        allowedRoles: [Role.ADMIN],
+      },
+      {
+        icon: ClipboardDocumentListIcon,
+        name: "Order History",
+        path: "/admin/orders",
+        allowedRoles: [Role.ADMIN],
+      },
+      {
+        icon: UserPlusIcon,
+        name: "Pending Approvals",
+        path: "/admin/registration-approval",
+        allowedRoles: [Role.ADMIN],
+      },
+      {
+        icon: UsersIcon,
+        name: "All Riders",
+        path: "/admin/riders",
+        allowedRoles: [Role.ADMIN],
       },
     ]
   },

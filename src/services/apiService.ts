@@ -1,3 +1,61 @@
+import { API_BASE_URL, getAuthHeaders } from './apiConfig';
+
+import axios from 'axios';
+
+/**
+ * Create an axios instance with a base URL
+ */
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+  }
+});
+
+/**
+ * Generic API Service for handling requests
+ */
+export const apiService = {
+  /**
+   * Send a GET request
+   */
+  async get<T>(url: string, token?: string): Promise<T> {
+    const config = token ? { headers: getAuthHeaders(token) } : undefined;
+    const response = await apiClient.get<T>(url, config);
+    return response.data;
+  },
+
+  /**
+   * Send a POST request
+   */
+  async post<T, D = Record<string, unknown>>(url: string, data: D, token?: string): Promise<T> {
+    const config = token ? { headers: getAuthHeaders(token) } : undefined;
+    const response = await apiClient.post<T>(url, data, config);
+    return response.data;
+  },
+
+  /**
+   * Send a PUT request
+   */
+  async put<T, D = Record<string, unknown>>(url: string, data: D, token?: string): Promise<T> {
+    const config = token ? { headers: getAuthHeaders(token) } : undefined;
+    const response = await apiClient.put<T>(url, data, config);
+    return response.data;
+  },
+
+  /**
+   * Send a DELETE request
+   */
+  async delete<T>(url: string, token?: string): Promise<T> {
+    const config = token ? { headers: getAuthHeaders(token) } : undefined;
+    const response = await apiClient.delete<T>(url, config);
+    return response.data;
+  }
+};
+
+export default apiService;
+
 // Define the expected structure of the User object in the API response
 
 // Define detailed UserProfile structure based on observed/expected data

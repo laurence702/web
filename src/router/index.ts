@@ -219,6 +219,34 @@ const router = createRouter({
           component: () => import('../views/SuperAdmin/StatsReports.vue'),
           meta: { title: 'Stats & Reports', requiresAuth: true }, // TODO: Add correct auth later
         },
+        // BranchAdmin routes
+        {
+          path: '/branch-admin',
+          name: 'BranchAdminDashboard',
+          component: () => import('../views/BranchAdmin/Dashboard.vue'),
+          meta: {
+            title: 'Branch Dashboard',
+            requiresAuth: true,
+          },
+        },
+        {
+          path: '/branch-admin/qr-scanner',
+          name: 'BranchAdminQRScanner',
+          component: () => import('../views/BranchAdmin/QRScanner.vue'),
+          meta: {
+            title: 'QR Scanner',
+            requiresAuth: true,
+          },
+        },
+        {
+          path: '/admin/rider-profile/:id',
+          name: 'RiderProfileView',
+          component: () => import('../views/BranchAdmin/RiderProfileView.vue'),
+          meta: {
+            title: 'Rider Profile',
+            requiresAuth: true,
+          },
+        },
         // --- NESTED ROUTES END ---
       ]
     },

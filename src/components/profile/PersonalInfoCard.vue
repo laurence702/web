@@ -10,12 +10,12 @@
           <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
             <div>
               <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">First Name</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">Musharof</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ firstName }}</p>
             </div>
 
             <div>
               <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Last Name</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">Chowdhury</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ lastName }}</p>
             </div>
 
             <div>
@@ -23,18 +23,18 @@
                 Email address
               </p>
               <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                randomuser@pimjo.com
+                {{ user?.email || 'N/A' }}
               </p>
             </div>
 
             <div>
               <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Phone</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">+09 363 398 46</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ user?.phone || 'N/A' }}</p>
             </div>
 
             <div>
               <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Bio</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">Team Manager</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ user?.role || 'N/A' }}</p>
             </div>
           </div>
         </div>
@@ -168,7 +168,7 @@
                     </label>
                     <input
                       type="text"
-                      value="Musharof"
+                      :value="firstName"
                       class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
@@ -181,7 +181,7 @@
                     </label>
                     <input
                       type="text"
-                      value="Chowdhury"
+                      :value="lastName"
                       class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
@@ -194,7 +194,7 @@
                     </label>
                     <input
                       type="text"
-                      value="emirhanboruch55@gmail.com"
+                      :value="user?.email || ''"
                       class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
@@ -207,7 +207,7 @@
                     </label>
                     <input
                       type="text"
-                      value="+09 363 398 46"
+                      :value="user?.phone || ''"
                       class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
@@ -220,7 +220,7 @@
                     </label>
                     <input
                       type="text"
-                      value="Team Manager"
+                      :value="user?.role || ''"
                       class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
@@ -251,10 +251,34 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import Modal from './Modal.vue'
 
+// Define props for the component
+const props = defineProps({
+  user: {
+    type: Object,
+    default: null
+  },
+  branch: {
+    type: Object,
+    default: null
+  }
+})
+
 const isProfileInfoModal = ref(false)
+
+// Compute firstName and lastName from fullname
+const firstName = computed(() => {
+  if (!props.user?.fullname) return 'N/A'
+  return props.user.fullname.split(' ')[0] || 'N/A'
+})
+
+const lastName = computed(() => {
+  if (!props.user?.fullname) return 'N/A'
+  const nameParts = props.user.fullname.split(' ')
+  return nameParts.length > 1 ? nameParts.slice(1).join(' ') : 'N/A'
+})
 
 const saveProfile = () => {
   // Implement save profile logic here

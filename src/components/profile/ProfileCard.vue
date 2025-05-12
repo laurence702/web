@@ -6,20 +6,20 @@
           <div
             class="w-20 h-20 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800"
           >
-            <img src="/images/user/owner.jpg" alt="user" />
+            <img :src="user?.user_profile?.profile_pic_url || '/images/user/owner.jpg'" alt="user" />
           </div>
           <div class="order-3 xl:order-2">
             <h4
               class="mb-2 text-lg font-semibold text-center text-gray-800 dark:text-white/90 xl:text-left"
             >
-              Musharof Chowdhury
+              {{ user?.fullname || 'Unknown User' }}
             </h4>
             <div
               class="flex flex-col items-center gap-1 text-center xl:flex-row xl:gap-3 xl:text-left"
             >
-              <p class="text-sm text-gray-500 dark:text-gray-400">Team Manager</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ user?.role || 'No Role' }}</p>
               <div class="hidden h-3.5 w-px bg-gray-300 dark:bg-gray-700 xl:block"></div>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Arizona, United States</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">{{ branch?.location || (user?.branch?.location) || 'Unknown Location' }}</p>
             </div>
           </div>
           <div class="flex items-center order-2 gap-2 grow xl:order-3 xl:justify-end">
@@ -229,7 +229,7 @@
                     </label>
                     <input
                       type="text"
-                      value="Musharof"
+                      :value="firstName"
                       class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
@@ -242,7 +242,7 @@
                     </label>
                     <input
                       type="text"
-                      value="Chowdhury"
+                      :value="lastName"
                       class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
@@ -255,7 +255,7 @@
                     </label>
                     <input
                       type="text"
-                      value="randomuser@pimjo.com"
+                      :value="user?.email || ''"
                       class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
@@ -268,7 +268,7 @@
                     </label>
                     <input
                       type="text"
-                      value="+09 363 398 46"
+                      :value="user?.phone || ''"
                       class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
@@ -281,7 +281,7 @@
                     </label>
                     <input
                       type="text"
-                      value="Team Manager"
+                      :value="user?.role || ''"
                       class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                     />
                   </div>
@@ -312,10 +312,34 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import Modal from './Modal.vue'
 
+// Define props for the component
+const props = defineProps({
+  user: {
+    type: Object,
+    default: null
+  },
+  branch: {
+    type: Object,
+    default: null
+  }
+})
+
 const isProfileInfoModal = ref(false)
+
+// Compute firstName and lastName from fullname
+const firstName = computed(() => {
+  if (!props.user?.fullname) return ''
+  return props.user.fullname.split(' ')[0] || ''
+})
+
+const lastName = computed(() => {
+  if (!props.user?.fullname) return ''
+  const nameParts = props.user.fullname.split(' ')
+  return nameParts.length > 1 ? nameParts.slice(1).join(' ') : ''
+})
 
 const saveProfile = () => {
   // Implement save profile logic here

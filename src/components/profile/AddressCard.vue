@@ -8,13 +8,15 @@
           <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
             <div>
               <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">Country</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">United States</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">
+                {{ getCountry }}
+              </p>
             </div>
 
             <div>
               <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">City/State</p>
               <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                Phoenix, United States
+                {{ getCityState }}
               </p>
             </div>
 
@@ -22,12 +24,12 @@
               <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
                 Postal Code
               </p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">ERT 2489</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ getPostalCode }}</p>
             </div>
 
             <div>
               <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">TAX ID</p>
-              <p class="text-sm font-medium text-gray-800 dark:text-white/90">AS4568384</p>
+              <p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ getTaxId }}</p>
             </div>
           </div>
         </div>
@@ -98,7 +100,7 @@
                   </label>
                   <input
                     type="text"
-                    value="United States"
+                    :value="getCountry"
                     class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   />
                 </div>
@@ -109,7 +111,7 @@
                   </label>
                   <input
                     type="text"
-                    value="Poenix, Arizona, United States"
+                    :value="getCityState"
                     class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   />
                 </div>
@@ -120,7 +122,7 @@
                   </label>
                   <input
                     type="text"
-                    value="ERT 2489"
+                    :value="getPostalCode"
                     class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   />
                 </div>
@@ -131,7 +133,7 @@
                   </label>
                   <input
                     type="text"
-                    value="AS4568384"
+                    :value="getTaxId"
                     class="dark:bg-dark-900 h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
                   />
                 </div>
@@ -161,10 +163,59 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import Modal from './Modal.vue'
 
+// Define props for the component
+const props = defineProps({
+  user: {
+    type: Object,
+    default: null
+  },
+  branch: {
+    type: Object,
+    default: null
+  }
+})
+
 const isProfileAddressModal = ref(false)
+
+// Compute address information
+const getCountry = computed(() => {
+  if (props.branch?.location) {
+    const locationParts = props.branch.location.split(',')
+    // Assume the last part is the country if it's long enough
+    if (locationParts.length > 1) {
+      return locationParts[locationParts.length - 1].trim()
+    }
+  }
+  return 'United States' // Default fallback
+})
+
+const getCityState = computed(() => {
+  if (props.branch?.location) {
+    const locationParts = props.branch.location.split(',')
+    // If we have at least a city and country
+    if (locationParts.length > 1) {
+      // Return all parts except the last one (which is the country)
+      return locationParts.slice(0, -1).join(', ').trim()
+    }
+    return props.branch.location
+  }
+  return props.branch?.name || 'N/A'
+})
+
+const getPostalCode = computed(() => {
+  // This would normally come from user_profile or branch data
+  // Using a placeholder value for now
+  return 'ERT 2489'
+})
+
+const getTaxId = computed(() => {
+  // This would normally come from user_profile or branch data
+  // Using a placeholder value for now
+  return 'AS4568384'
+})
 
 const saveProfile = () => {
   // Implement save profile logic here

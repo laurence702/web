@@ -101,6 +101,7 @@ const columns = ref<ColumnDefinition[]>([
   { key: 'status', label: 'Status' },
 ]);
 
+
 // --- Helper Functions ---
 const getStatusBadgeClass = (status: string): string => {
   switch (status.toLowerCase()) {

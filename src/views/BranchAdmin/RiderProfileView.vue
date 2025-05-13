@@ -236,11 +236,12 @@
                   v-model="orderForm.product" 
                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-brand-500 focus:border-brand-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   required
+                  @change="handleProductChange"
                 >
                   <option value="" disabled>Select a product</option>
-                  <option value="CNG">CNG (Compressed Natural Gas)</option>
-                  <option value="LPG">LPG (Liquefied Petroleum Gas)</option>
-                  <option value="LNG">LNG (Liquefied Natural Gas)</option>
+                  <option value="pms">PMS (Premium Motor Spirit)</option>
+                  <option value="cng">CNG (Compressed Natural Gas)</option>
+                  <option value="lpg">LPG (Liquefied Petroleum Gas)</option>
                 </select>
               </div>
               
@@ -256,7 +257,6 @@
                   <option value="" disabled>Select payment method</option>
                   <option value="cash">Cash</option>
                   <option value="transfer">Bank Transfer</option>
-                  <option value="credit">Credit</option>
                 </select>
               </div>
               
@@ -279,15 +279,16 @@
               <!-- Amount Due -->
               <div class="mb-4">
                 <label for="amount_due" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Amount Due (₦)</label>
-                <input 
+                <select 
                   id="amount_due" 
-                  type="number" 
                   v-model="orderForm.amount_due" 
                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-brand-500 focus:border-brand-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  min="1"
                   required
-                  @input="handleAmountDueChange"
-                />
+                  @change="handleAmountDueChange"
+                >
+                  <option value="" disabled>Select amount</option>
+                  <option v-for="value in amountDueOptions" :key="value" :value="value">₦{{ formatAmount(value) }}</option>
+                </select>
               </div>
               
               <!-- Amount Paid (for partial payment) -->
@@ -444,6 +445,7 @@ import {
   ClipboardDocumentIcon
 } from '@heroicons/vue/24/outline';
 import apiService from '@/services/apiService';
+import { generateAmountOptions, generatePartialPaymentOptions } from '@/services/productRules';
 
 // Define component name
 defineOptions({
@@ -614,25 +616,31 @@ const orderForm = ref({
   product: '',
   payment_method: '',
   payment_type: '',
-  amount_due: 0,
+  amount_due: '' as string | number,
   amount_paid: '' as string | number
 });
 
 // Available amount options
 const availableAmountOptions = ref<number[]>([]);
+const amountDueOptions = ref<number[]>([]);
 
-// Generate amount options based on amount due
-function generateAmountOptions(maxAmount: number) {
-  const options: number[] = [];
-  const minValue = 1000;
-  const step = 1000;
+// Get rider's vehicle type 
+function getRiderVehicleType(): string {
+  return rider.value?.user_profile?.vehicle_type || 'other';
+}
+
+// Handle product change
+function handleProductChange() {
+  // Reset amount-related fields
+  orderForm.value.amount_due = '';
+  orderForm.value.amount_paid = '';
   
-  // Add options from 1,000 to maxAmount-1000 in 1000 increments
-  for (let amount = minValue; amount < maxAmount; amount += step) {
-    options.push(amount);
-  }
+  // Generate amount due options based on product and vehicle type
+  const vehicleType = getRiderVehicleType();
+  amountDueOptions.value = generateAmountOptions(orderForm.value.product, vehicleType);
   
-  return options;
+  // Clear partial payment options until amount_due is selected
+  availableAmountOptions.value = [];
 }
 
 // Handle payment type change
@@ -641,8 +649,8 @@ function handlePaymentTypeChange() {
     orderForm.value.amount_paid = orderForm.value.amount_due;
   } else if (orderForm.value.payment_type === 'part') {
     orderForm.value.amount_paid = '';
-    // Generate options based on amount due
-    updateAmountOptions();
+    // Generate options based on amount due, product, and vehicle type
+    updatePartialPaymentOptions();
   }
 }
 
@@ -652,16 +660,21 @@ function handleAmountDueChange() {
     orderForm.value.amount_paid = orderForm.value.amount_due;
   } else if (orderForm.value.payment_type === 'part') {
     orderForm.value.amount_paid = '';
-    // Regenerate amount options based on new amount due
-    updateAmountOptions();
+    // Regenerate partial payment options
+    updatePartialPaymentOptions();
   }
 }
 
-// Update amount options based on amount due
-function updateAmountOptions() {
-  const maxAmount = orderForm.value.amount_due;
-  if (maxAmount > 1000) {
-    availableAmountOptions.value = generateAmountOptions(maxAmount);
+// Update partial payment options based on amount due, product, and vehicle type
+function updatePartialPaymentOptions() {
+  const fullAmount = Number(orderForm.value.amount_due);
+  if (fullAmount > 0 && orderForm.value.product) {
+    const vehicleType = getRiderVehicleType();
+    availableAmountOptions.value = generatePartialPaymentOptions(
+      fullAmount, 
+      orderForm.value.product, 
+      vehicleType
+    );
   } else {
     availableAmountOptions.value = [];
   }
@@ -670,15 +683,18 @@ function updateAmountOptions() {
 // Open and close modal functions
 function openNewOrderModal() {
   showOrderModal.value = true;
+  
   // Reset form fields
   orderForm.value = {
     product: '',
     payment_method: '',
     payment_type: '',
-    amount_due: 0,
+    amount_due: '',
     amount_paid: ''
   };
-  // Reset amount options
+  
+  // Reset options
+  amountDueOptions.value = [];
   availableAmountOptions.value = [];
 }
 
@@ -698,12 +714,13 @@ async function createOrder() {
     
     // Prepare order data
     const orderData = {
-      rider_id: rider.value.id,
+      payer_id: rider.value.id,
       ...orderForm.value
     };
     
+    console.log('orderData', orderData);
     // Make API call to create order
-    await apiService.post('/api/orders', orderData, token);
+    await apiService.post('/api/branch-admin/orders', orderData, token);
     
     // Show success message
     alertInfo.value = {
@@ -809,7 +826,7 @@ async function fetchPaymentHistory() {
         rider_id: rider.value.id,
         product: 'CNG',
         amount: 20000,
-        payment_method: 'credit',
+        payment_method: 'transfer',
         status: 'pending',
         created_at: '2023-05-05T09:15:00Z'
       }

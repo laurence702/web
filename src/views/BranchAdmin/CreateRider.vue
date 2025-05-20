@@ -252,16 +252,6 @@ const submitForm = async () => {
 
 </script>
 
-<style scoped>
-.form-label {
-  @apply block mb-1.5 text-sm font-medium text-gray-700 dark:text-gray-300;
-}
+<style scoped lang="ts">
 
-.form-textarea {
-  @apply w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-brand-500 focus:border-brand-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white;
-}
-
-.form-file-input {
-    @apply block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400;
-}
 </style> 

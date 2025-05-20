@@ -20,8 +20,8 @@
             <BaseInput v-model="formData.nin" label="NIN (National Identification Number)" type="text" placeholder="Enter 11-digit NIN" required inputId="admin-create-rider-nin" :maxlength="11" />
           </div>
           <div>
-            <label for="admin-create-rider-address" class="form-label">Address (Residential)</label>
-            <textarea v-model="formData.address" id="admin-create-rider-address" rows="3" placeholder="Enter full residential address" required class="form-textarea"></textarea>
+            <label for="admin-create-rider-address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Address (Residential)</label>
+            <textarea v-model="formData.address" id="admin-create-rider-address" rows="3" placeholder="Enter full residential address" required class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-500 focus:border-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
           </div>
 
           <!-- Guarantor & Vehicle -->
@@ -39,21 +39,21 @@
             />
           </div>
           <div>
-            <label for="admin-create-guarantor-address" class="form-label">Guarantor's Address</label>
-            <textarea v-model="formData.guarantorAddress" id="admin-create-guarantor-address" rows="3" placeholder="Enter guarantor's full address" required class="form-textarea"></textarea>
+            <label for="admin-create-guarantor-address" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Guarantor's Address</label>
+            <textarea v-model="formData.guarantorAddress" id="admin-create-guarantor-address" rows="3" placeholder="Enter guarantor's full address" required class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-500 focus:border-brand-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"></textarea>
           </div>
 
           <!-- Account Security & Profile -->
           <h3 class="text-lg font-medium text-gray-700 dark:text-gray-300 border-b pb-2 mb-4 mt-6">Account & Profile</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label for="admin-create-profile-picture" class="form-label">Profile Picture</label>
+              <label for="admin-create-profile-picture" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Profile Picture</label>
               <input
                   type="file"
                   id="admin-create-profile-picture"
                   @change="handleFileChange"
                   accept="image/*"
-                  class="form-file-input"
+                  class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
                   :disabled="uploadingProfilePic"
                 />
               <div v-if="uploadingProfilePic" class="mt-2 text-sm text-blue-600 dark:text-blue-400">Uploading picture...</div>

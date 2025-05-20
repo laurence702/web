@@ -121,17 +121,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, defineProps, defineEmits } from 'vue';
 import type { PropType } from 'vue';
-
-type ColumnDefinition = {
-  key: string;
-  label: string;
-  sortable?: boolean;
-};
-
-type SortDirection = 'asc' | 'desc' | null;
-
-// Define a generic TableRow type using an index signature
-type TableRow = { [key: string]: unknown };
+import type { ColumnDefinition, TableRow, SortDirection } from '@/types/table'; // Import from global types
 
 const props = defineProps({
   columns: {

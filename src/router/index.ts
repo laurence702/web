@@ -247,6 +247,35 @@ const router = createRouter({
             requiresAuth: true,
           },
         },
+        {
+          path: '/branch-admin/orders',
+          name: 'BranchAdminOrderHistory',
+          component: () => import('../views/BranchAdmin/OrderHistory.vue'),
+          meta: {
+            title: 'Order History',
+            requiresAuth: true,
+          },
+        },
+        {
+          path: '/branch-admin/pending-approvals',
+          name: 'BranchAdminPendingApprovals',
+          component: () => import('../views/BranchAdmin/PendingApprovals.vue'),
+          meta: {
+            title: 'Pending Approvals',
+            requiresAuth: true,
+            allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN]
+          },
+        },
+        {
+          path: '/branch-admin/create-rider',
+          name: 'BranchAdminCreateRider',
+          component: () => import('../views/BranchAdmin/CreateRider.vue'),
+          meta: {
+            title: 'Create Rider',
+            requiresAuth: true,
+            allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN] // Or just Role.ADMIN
+          },
+        },
         // --- NESTED ROUTES END ---
       ]
     },

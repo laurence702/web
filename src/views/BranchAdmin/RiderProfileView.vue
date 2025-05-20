@@ -22,7 +22,7 @@
     </div>
     
     <div v-else class="space-y-5">
-      <!-- Alert Message -->
+      <!-- Alert Message for API responses -->
       <Alert 
         v-if="alertInfo.show" 
         :variant="alertInfo.type" 
@@ -30,6 +30,15 @@
         :message="alertInfo.message"
         :showLink="false"
         class="mb-4"
+      />
+
+      <!-- Eligibility Alert -->
+      <Alert 
+        v-if="Number(rider.balance) > 0" 
+        variant="error" 
+        title="Not Eligible for Purchase" 
+        message="Please clear your debts before making a new purchase."
+        :showLink="false"
       />
 
       <!-- Rider Profile Card -->
@@ -56,10 +65,11 @@
                 </p>
               </div>
               
-              <div class="flex flex-col w-full space-y-2">
+              <div v-if="rider.balance == 0" class="flex flex-col w-full space-y-2">
                 <button
                   @click="openNewOrderModal"
                   class="flex justify-center items-center px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-opacity-50"
+                  :disabled="Number(rider.balance) > 0"
                 >
                   <ShoppingCartIcon class="h-5 w-5 mr-2" />
                   Buy Product
@@ -85,23 +95,11 @@
                   </p>
                 </div>
                 
-                <div class="flex items-center space-x-2">
+                <div v-if="rider.banned_at" class="flex items-center space-x-2">
                   <div
-                    :class="{
-                      'bg-success-100 text-success-800 dark:bg-success-900/30 dark:text-success-500': rider.verification_status === 'verified',
-                      'bg-warning-100 text-warning-800 dark:bg-warning-900/30 dark:text-warning-500': rider.verification_status === 'pending',
-                      'bg-error-100 text-error-800 dark:bg-error-900/30 dark:text-error-500': rider.verification_status === 'rejected'
-                    }"
-                    class="px-3 py-1 rounded-full text-sm font-medium"
-                  >
-                    {{ capitalizeFirstLetter(rider.verification_status || 'pending') }}
-                  </div>
-                  
-                  <div
-                    v-if="rider.banned_at"
                     class="bg-error-100 text-error-800 dark:bg-error-900/30 dark:text-error-500 px-3 py-1 rounded-full text-sm font-medium"
                   >
-                    Banned
+                   Rider has been Banned
                   </div>
                 </div>
               </div>
@@ -160,7 +158,7 @@
                     <div class="flex items-start">
                       <CurrencyNairaIcon class="h-5 w-5 text-gray-400 mr-2 mt-0.5" />
                       <div>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Balance</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Unpaid Balance</p>
                         <p class="text-gray-800 dark:text-white/90">₦{{ formatAmount(rider.balance || 0) }}</p>
                       </div>
                     </div>
@@ -170,6 +168,23 @@
                       <div>
                         <p class="text-gray-500 dark:text-gray-400 text-sm">Registered</p>
                         <p class="text-gray-800 dark:text-white/90">{{ formatDate(rider.created_at) }}</p>
+                      </div>
+                    </div>
+
+                    <div class="flex items-start">
+                      <CheckBadgeIcon class="h-5 w-5 text-gray-400 mr-2 mt-0.5" />
+                      <div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Status</p>
+                        <div
+                          :class="{
+                            'bg-success-100 text-success-800 dark:bg-success-900/30 dark:text-success-500': rider.verification_status === 'verified',
+                            'bg-warning-100 text-warning-800 dark:bg-warning-900/30 dark:text-warning-500': rider.verification_status === 'pending',
+                            'bg-error-100 text-error-800 dark:bg-error-900/30 dark:text-error-500': rider.verification_status === 'rejected'
+                          }"
+                          class="inline-block px-3 py-1 rounded-full text-sm font-medium mt-1"
+                        >
+                          {{ capitalizeFirstLetter(rider.verification_status || 'pending') }}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -256,7 +271,7 @@
                 >
                   <option value="" disabled>Select payment method</option>
                   <option value="cash">Cash</option>
-                  <option value="transfer">Bank Transfer</option>
+                  <option value="bank_transfer">Bank Transfer</option>
                 </select>
               </div>
               
@@ -304,7 +319,7 @@
                   <option v-for="value in availableAmountOptions" :key="value" :value="value">₦{{ formatAmount(value) }}</option>
                 </select>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                  Balance: ₦{{ formatAmount(orderForm.amount_due - (orderForm.amount_paid || 0)) }}
+                  Balance: ₦{{ formatAmount(Number(orderForm.amount_due) - Number(orderForm.amount_paid || 0)) }}
                 </p>
               </div>
               
@@ -368,17 +383,15 @@
             <div v-else-if="paymentHistory.length === 0" class="flex flex-col items-center justify-center p-10 text-center">
               <ClipboardDocumentIcon class="h-12 w-12 text-gray-400 mb-3" />
               <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90 mb-2">No Payment Records</h4>
-              <p class="text-gray-500 dark:text-gray-400">This rider has no payment history yet.</p>
+              <p class="text-gray-500 dark:text-gray-400">This rider has not made any payments yet.</p>
             </div>
             
             <div v-else class="overflow-x-auto">
               <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Order ID</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Product</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Amount</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Payment Method</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Date</th>
                   </tr>
@@ -386,16 +399,10 @@
                 <tbody class="bg-white dark:bg-transparent divide-y divide-gray-200 dark:divide-gray-700">
                   <tr v-for="payment in paymentHistory" :key="payment.id" class="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {{ payment.order_id }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {{ payment.product }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       ₦{{ formatAmount(payment.amount) }}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {{ capitalizeFirstLetter(payment.payment_method) }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                       <span 
@@ -416,6 +423,17 @@
                 </tbody>
               </table>
             </div>
+
+            <!-- See All Orders Link -->
+            <div v-if="paymentHistory.length > 0" class="mt-4 text-right">
+                <button 
+                  @click="goToOrderHistoryForRider"
+                  class="text-sm font-medium text-brand-600 hover:text-brand-500 dark:text-brand-400 dark:hover:text-brand-300 focus:outline-none"
+                >
+                  See all orders
+                </button>
+            </div>
+
           </div>
         </div>
       </template>
@@ -442,7 +460,8 @@ import {
   ShoppingCartIcon,
   ClockIcon,
   XMarkIcon,
-  ClipboardDocumentIcon
+  ClipboardDocumentIcon,
+  CheckBadgeIcon
 } from '@heroicons/vue/24/outline';
 import apiService from '@/services/apiService';
 import { generateAmountOptions, generatePartialPaymentOptions } from '@/services/productRules';
@@ -570,8 +589,11 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-function formatAmount(amount: number): string {
-  return amount.toLocaleString();
+function formatAmount(amount: number | null | undefined): string {
+  if (amount === undefined || amount === null || isNaN(amount)) {
+    return '0.00'; // Or some other default like 'N/A'
+  }
+  return Number(amount).toLocaleString();
 }
 
 function capitalizeFirstLetter(str: string): string {
@@ -774,13 +796,11 @@ interface Payment {
 // Payment history
 const paymentHistory = ref<Payment[]>([]);
 
-// View payment history
 async function viewPaymentHistory() {
   showPaymentHistoryModal.value = true;
   await fetchPaymentHistory();
 }
 
-// Fetch payment history
 async function fetchPaymentHistory() {
   try {
     isLoadingPayments.value = true;
@@ -791,53 +811,22 @@ async function fetchPaymentHistory() {
       throw new Error('User is not authenticated');
     }
     
-    // Make API call to fetch payment history
-    // In a real application, we would call an actual API endpoint
-    // For this example, we'll use mock data after a short delay to simulate API call
+    // Make real API call to fetch payment history
+    const response = await apiService.get<{ data: Payment[] }>(
+      `/api/payment-histories?rider_id=${rider.value.id}`, 
+      token
+    );
     
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    if (response && response.data) {
+      paymentHistory.value = response.data;
+    } else {
+      paymentHistory.value = [];
+    }
     
-    // Mock payment history data
-    paymentHistory.value = [
-      {
-        id: '1',
-        order_id: 'ORD-001',
-        rider_id: rider.value.id,
-        product: 'CNG',
-        amount: 15000,
-        payment_method: 'cash',
-        status: 'completed',
-        created_at: '2023-05-15T10:30:00Z'
-      },
-      {
-        id: '2',
-        order_id: 'ORD-002',
-        rider_id: rider.value.id,
-        product: 'LPG',
-        amount: 10000,
-        payment_method: 'transfer',
-        status: 'completed',
-        created_at: '2023-05-10T14:20:00Z'
-      },
-      {
-        id: '3',
-        order_id: 'ORD-003',
-        rider_id: rider.value.id,
-        product: 'CNG',
-        amount: 20000,
-        payment_method: 'transfer',
-        status: 'pending',
-        created_at: '2023-05-05T09:15:00Z'
-      }
-    ];
-    
-    // In a real application, we would call an API endpoint like:
-    // const response = await apiService.get<{data: Payment[]}>(`/api/riders/${rider.value.id}/payments`, token);
-    // paymentHistory.value = response.data;
   } catch (err: unknown) {
     console.error('Error fetching payment history:', err);
     paymentHistoryError.value = err instanceof Error ? err.message : 'An unknown error occurred';
+    paymentHistory.value = []; // Reset to empty array on error
   } finally {
     isLoadingPayments.value = false;
   }
@@ -846,6 +835,14 @@ async function fetchPaymentHistory() {
 // Close payment history modal
 function closePaymentHistoryModal() {
   showPaymentHistoryModal.value = false;
+}
+
+// Navigate to Order History page for this rider
+function goToOrderHistoryForRider() {
+  router.push({
+    path: '/branch-admin/order-history',
+    query: { rider_id: rider.value.id }
+  });
 }
 
 function goBack() {

@@ -283,7 +283,7 @@ const allMenuGroups: MenuGroup[] = [
       {
         icon: BoxCubeIcon,
         name: "Product Management",
-        path: "/super-admin/products",
+        path: "/admin/products",
         allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN],
       },
       {
@@ -355,19 +355,25 @@ const allMenuGroups: MenuGroup[] = [
       {
         icon: ClipboardDocumentListIcon,
         name: "Order History",
-        path: "/admin/orders",
+        path: "/branch-admin/orders",
         allowedRoles: [Role.ADMIN],
       },
       {
         icon: UserPlusIcon,
         name: "Pending Approvals",
-        path: "/admin/registration-approval",
+        path: "/branch-admin/pending-approvals",
         allowedRoles: [Role.ADMIN],
       },
       {
         icon: UsersIcon,
         name: "All Riders",
         path: "/admin/riders",
+        allowedRoles: [Role.ADMIN],
+      },
+      {
+        icon: UserPlusIcon,
+        name: "Create New Rider",
+        path: "/branch-admin/create-rider",
         allowedRoles: [Role.ADMIN],
       },
     ]

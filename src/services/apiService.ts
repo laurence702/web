@@ -91,7 +91,7 @@ export interface ApiUser {
   role: string;
   verification_status: string;
   branch_id: number | null; // Keep ID if needed, but use branch object primarily
-  branch: BranchData | null; // Add the nested branch object
+  branch?: BranchData | null; // Add the nested branch object, make it optional
   user_profile: UserProfileData | null;
   // Include other fields from example if needed (e.g., balance, banned_at)
   balance?: string;

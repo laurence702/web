@@ -1,4 +1,4 @@
-import type { ApiUser, LoginResponse, RiderRegistrationResponse, UserProfileData } from '@/services/apiService'
+import type { ApiUser, LoginResponse, RiderRegistrationResponse } from '@/services/apiService'
 import { computed, ref } from 'vue'
 
 import { defineStore } from 'pinia'
@@ -15,6 +15,8 @@ export enum Role {
 
 // type UserProfile removed as UserProfileData is imported and used
 
+// Removed internal User type definition as ApiUser will be used directly
+/*
 type User = {
   id: string;
   fullname: string;
@@ -28,6 +30,7 @@ type User = {
   updated_at: string;
   balance?: string | null; // Added optional balance property
 } | null;
+*/
 
 const AUTH_TOKEN_KEY = 'authToken';
 const USER_DATA_KEY = 'userData';
@@ -47,7 +50,7 @@ const USER_DATA_KEY = 'userData';
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref<string | null>(null);
-  const currentUser = ref<User>(null);
+  const currentUser = ref<ApiUser | null>(null);
   const profileLoading = ref<boolean>(false);
   const profileError = ref<string | null>(null);
   const isInitialized = ref<boolean>(false);
@@ -85,21 +88,11 @@ export const useAuthStore = defineStore('auth', () => {
       // Log the mapped enum value
       console.log('[AuthStore] Mapped role enum:', userRoleEnum);
 
-       // Now use the correctly typed enum member
-       const storeUser: User = {
-          id: apiUserData.id,
-          fullname: apiUserData.fullname,
-          email: apiUserData.email,
-          phone: apiUserData.phone,
-          role: userRoleEnum, // Assign the enum member
-          verification_status: apiUserData.verification_status,
-          branch_id: apiUserData.branch_id !== null && apiUserData.branch_id !== undefined ? String(apiUserData.branch_id) : null,
-          user_profile: apiUserData.user_profile,
-          created_at: apiUserData.created_at,
-          updated_at: apiUserData.updated_at,
-          balance: apiUserData.balance,
-      };
-      currentUser.value = storeUser;
+      // Assign the incoming ApiUser data directly to currentUser ref
+      // Ensure the role is mapped to the enum type before assignment
+      const userWithMappedRole: ApiUser = { ...apiUserData, role: userRoleEnum };
+      currentUser.value = userWithMappedRole; // Assign ApiUser directly
+      
       console.log('[AuthStore] Set currentUser state. Current role:', currentUser.value?.role);
   }
 
@@ -107,7 +100,7 @@ export const useAuthStore = defineStore('auth', () => {
       token.value = newToken;
   }
 
-  function setUserStorage(user: User | null) {
+  function setUserStorage(user: ApiUser | null) {
     if (user) {
       localStorage.setItem(USER_DATA_KEY, JSON.stringify(user));
     } else {
@@ -208,13 +201,34 @@ export const useAuthStore = defineStore('auth', () => {
                 roleString = parsedUser.role as string;
                 roleIsValid = isValidRole(roleString);
             }
-            console.log(`[AuthStore] User Validation: hasId=${hasId}, hasRole=${hasRole}, roleString='${roleString}', roleIsValid=${roleIsValid}`);
+            // Also check for other required fields for minimal validity
+            const hasRequiredFields = hasId && typeof parsedUser.fullname === 'string' && typeof parsedUser.email === 'string' && typeof parsedUser.phone === 'string' && typeof parsedUser.verification_status === 'string';
 
-            if (hasId && hasRole && roleIsValid) {
-              setUserState(parsedUser as unknown as ApiUser);
+            console.log(`[AuthStore] User Validation: hasId=${hasId}, hasRole=${hasRole}, roleString='${roleString}', roleIsValid=${roleIsValid}, hasRequiredFields=${hasRequiredFields}`);
+
+            if (hasRequiredFields && roleIsValid) {
+              // Explicitly construct ApiUser from parsed data
+              const userFromStorage: ApiUser = {
+                  id: parsedUser.id as string,
+                  fullname: parsedUser.fullname as string,
+                  email: parsedUser.email as string,
+                  phone: parsedUser.phone as string,
+                  role: roleString as Role, // Use the validated role string mapped to enum
+                  verification_status: parsedUser.verification_status as string,
+                  branch_id: parsedUser.branch_id !== null && parsedUser.branch_id !== undefined ? (typeof parsedUser.branch_id === 'number' ? parsedUser.branch_id : (typeof parsedUser.branch_id === 'string' ? parseInt(parsedUser.branch_id, 10) : null)) : null, // Ensure branch_id is number | null
+                  branch: (parsedUser.branch && typeof parsedUser.branch === 'object') ? parsedUser.branch as ApiUser['branch'] : null, // Include branch, check if it's an object
+                  user_profile: (parsedUser.user_profile && typeof parsedUser.user_profile === 'object') ? parsedUser.user_profile as ApiUser['user_profile'] : null, // Include user_profile
+                  created_at: parsedUser.created_at as string,
+                  updated_at: parsedUser.updated_at as string,
+                  balance: typeof parsedUser.balance === 'string' ? parsedUser.balance as string : undefined, // Include balance, expect string or undefined
+                  banned_at: typeof parsedUser.banned_at === 'string' ? parsedUser.banned_at as string : undefined, // Include banned_at, expect string or undefined based on error
+                  // Add other potential ApiUser properties from apiService.ts if they exist in stored data
+              };
+
+              setUserState(userFromStorage);
               console.log('[AuthStore] User validation successful. Set from storage.');
             } else {
-              console.warn('[AuthStore] Stored user data failed validation. Clearing user state.');
+              console.warn('[AuthStore] Stored user data failed validation (missing required fields or invalid role). Clearing user state.');
               setUserState(null);
               setUserStorage(null);
             }
@@ -242,7 +256,7 @@ export const useAuthStore = defineStore('auth', () => {
       clearAuthData(true);
     }
     isInitialized.value = true;
-    console.log('[AuthStore] Auth loading complete. Initialized:', isInitialized.value, 'Token Exists:', !!token.value, 'User Exists:', !!currentUser.value);
+    console.log('[AuthStore] loadAuthFromStorage complete. Initialized:', isInitialized.value);
   }
 
   // Initial load

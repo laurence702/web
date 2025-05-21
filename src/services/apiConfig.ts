@@ -5,12 +5,12 @@
  * based on the current environment.
  */
 
-// Get the API URL based on environment
+// Other imports if any
+
 const getApiBaseUrl = (): string => {
-  if (import.meta.env.PROD) {
-    return import.meta.env.VITE_PROD_API_URL || '';
-  }
-  return import.meta.env.VITE_DEV_API_URL || 'http://localhost:8000';
+  // Vite automatically loads the correct .env.[mode] file
+  // VITE_API_BASE_URL is defined in both .env.development and .env.production
+  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'; // Provide a fallback
 };
 
 // The base URL for API requests

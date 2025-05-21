@@ -354,7 +354,7 @@ router.beforeEach(async (to, from, next) => {
   } else if (authStore.isAuthenticated && publicPages.includes(to.path)) {
     console.log('Redirecting to dashboard, isAuthenticated=true, path is public auth page')
     // Check if the current role is specifically RIDER or SUPER_ADMIN before redirecting to rider profile
-    next((currentRole !== null && (currentRole === Role.RIDER || currentRole === Role.SUPER_ADMIN)) ? '/rider/profile' : '/')
+    next((currentRole !== null && (currentRole as string === Role.RIDER as string || currentRole as string === Role.SUPER_ADMIN as string)) ? '/rider/profile' : '/')
   } else {
     console.log('Allowing navigation to public route.')
     next()

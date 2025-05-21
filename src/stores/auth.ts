@@ -26,6 +26,7 @@ type User = {
   user_profile: UserProfileData | null;
   created_at: string;
   updated_at: string;
+  balance?: string | null; // Added optional balance property
 } | null;
 
 const AUTH_TOKEN_KEY = 'authToken';
@@ -96,6 +97,7 @@ export const useAuthStore = defineStore('auth', () => {
           user_profile: apiUserData.user_profile,
           created_at: apiUserData.created_at,
           updated_at: apiUserData.updated_at,
+          balance: apiUserData.balance,
       };
       currentUser.value = storeUser;
       console.log('[AuthStore] Set currentUser state. Current role:', currentUser.value?.role);

@@ -75,7 +75,7 @@ export interface UserProfileData { // Export this
 }
 
 // Define Branch structure based on user object example
-interface BranchData {
+export interface BranchData {
   id: number;
   name: string;
   location?: string;

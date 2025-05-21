@@ -234,15 +234,17 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import Modal from './Modal.vue'
+import type { PropType } from 'vue'
+import type { ApiUser, BranchData } from '@/services/apiService'
 
 // Define props for the component
 const props = defineProps({
   user: {
-    type: Object,
+    type: [Object, null] as PropType<ApiUser | null>,
     default: null
   },
   branch: {
-    type: Object,
+    type: [Object, null] as PropType<BranchData | null>,
     default: null
   }
 })

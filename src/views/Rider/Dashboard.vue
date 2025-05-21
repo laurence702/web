@@ -50,18 +50,18 @@
             <div>
               <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Account Balance</p>
               <h3 class="mt-1 text-2xl font-semibold" 
-                :class="[riderStats.accountBalance >= 0 ? 'text-success-500' : 'text-error-500']"
+                :class="[accountBalance >= 0 ? 'text-success-500' : 'text-error-500']"
               >
-                ₦{{ formatAmount(riderStats.accountBalance) }}
+                ₦{{ formatAmount(accountBalance) }}
               </h3>
             </div>
             <div class="flex-shrink-0">
               <CurrencyDollarIcon class="h-10 w-10 opacity-70" 
-                :class="[riderStats.accountBalance >= 0 ? 'text-success-500' : 'text-error-500']" />
+                :class="[accountBalance >= 0 ? 'text-success-500' : 'text-error-500']" />
             </div>
           </div>
           <p class="mt-3 text-xs text-gray-400 dark:text-gray-500">
-            {{ riderStats.accountBalance >= 0 ? 'In credit' : 'Outstanding debt' }}
+            {{ accountBalance >= 0 ? 'In credit' : 'Outstanding debt' }}
           </p>
         </div>
       </BaseCard>
@@ -107,7 +107,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue';
 import BaseCard from '@/components/common/BaseCard.vue';
@@ -136,19 +136,29 @@ interface RiderStats {
   lastPurchaseDaysAgo: number;
   pendingPaymentsAmount: number;
   pendingPaymentsCount: number;
-  accountBalance: number;
+  // accountBalance: number; // Removed direct prop from interface
 }
 
-const riderStats = ref<RiderStats>({
+const riderStats = ref<Omit<RiderStats, 'accountBalance'>>({
   totalPurchases: 0,
   lastPurchaseDaysAgo: 0,
   pendingPaymentsAmount: 0,
   pendingPaymentsCount: 0,
-  accountBalance: 0,
+  // accountBalance: 0, // Removed direct prop from ref
 });
 
-function formatAmount(amount: number): string {
-  return amount.toLocaleString('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).replace('NGN', '');
+// Computed property for account balance
+const accountBalance = computed(() => {
+  const balanceString = authStore.currentUser?.balance;
+  const balance = balanceString ? parseFloat(balanceString) : 0;
+  return isNaN(balance) ? 0 : balance;
+});
+
+function formatAmount(amount: number | null | undefined): string {
+  if (amount === undefined || amount === null || isNaN(amount)) {
+    return '0.00'; // Or some other default like 'N/A'
+  }
+  return Number(amount).toLocaleString('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).replace('NGN', '');
 }
 
 async function fetchRiderStats() {
@@ -170,10 +180,9 @@ async function fetchRiderStats() {
       lastPurchaseDaysAgo: 3,
       pendingPaymentsAmount: 12500,
       pendingPaymentsCount: 2,
-      accountBalance: authStore.currentUser.balance ? parseFloat(authStore.currentUser.balance) : 0, // Use actual balance
     };
 
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Error fetching rider stats:', err);
     // error.value = err.message || 'Failed to load dashboard data.';
   } finally {

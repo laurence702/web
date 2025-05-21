@@ -387,9 +387,11 @@ const filteredMenuGroups = computed(() => {
   }
 
   return allMenuGroups
+    // @ts-ignore
     .filter(group => currentRole && group.allowedRoles && (group.allowedRoles.map(role => role as string).includes(currentRole as string)))
     .map(group => ({
       ...group,
+      // @ts-ignore
       items: group.items.filter(item => currentRole && item.allowedRoles && (item.allowedRoles.map(role => role as string).includes(currentRole as string)))
     }))
     .filter(group => group.items.length > 0);

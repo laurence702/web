@@ -381,16 +381,16 @@ const allMenuGroups: MenuGroup[] = [
 ];
 
 const filteredMenuGroups = computed(() => {
-  const currentRole = authStore.userRole;
+  const currentRole = authStore.userRoleTyped;
   if (!currentRole || !authStore.isAuthenticated) {
     return [];
   }
 
   return allMenuGroups
-    .filter(group => group.allowedRoles?.includes(currentRole))
+    .filter(group => group.allowedRoles && currentRole !== null && group.allowedRoles.includes(currentRole))
     .map(group => ({
       ...group,
-      items: group.items.filter(item => item.allowedRoles?.includes(currentRole))
+      items: group.items.filter(item => item.allowedRoles && currentRole !== null && item.allowedRoles.includes(currentRole))
     }))
     .filter(group => group.items.length > 0);
 });

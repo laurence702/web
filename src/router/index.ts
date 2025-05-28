@@ -10,7 +10,7 @@ const router = createRouter({
   },
   routes: [
     {
-      path: '/', // Parent route using the layout
+      path: '/',
       component: AdminLayout,
       // meta: { requiresAuth: true }, // Add auth requirement if needed for all nested routes
       children: [
@@ -344,7 +344,7 @@ router.beforeEach(async (to, from, next) => {
 
   document.title = to.meta.title ? `GasoPay | ${to.meta.title}` : 'GasoPay'
 
-  const currentRole = authStore.userRole
+  const currentRole = authStore.userRoleTyped
 
   if (requiresAuth) {
     // Log the actual token value just before the check
@@ -362,8 +362,10 @@ router.beforeEach(async (to, from, next) => {
       next()
     }
   } else if (authStore.isAuthenticated && publicPages.includes(to.path)) {
-    console.log('Redirecting to dashboard, isAuthenticated=true, path is public auth page')
-    next(currentRole === (Role.RIDER || Role.SUPER_ADMIN) ? '/rider/profile' : '/')
+    console.log('Redirecting to dashboard, isAuthenticated=true, path is public auth page');
+    // Use a more explicit check for rider or super_admin role
+    const isRiderOrSuperAdmin = currentRole === Role.RIDER || currentRole === Role.SUPER_ADMIN;
+    next(isRiderOrSuperAdmin ? '/rider/profile' : '/');
   } else {
     console.log('Allowing navigation to public route.')
     next()

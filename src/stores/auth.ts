@@ -296,6 +296,15 @@ export const useAuthStore = defineStore('auth', () => {
   const userRole = computed(() => currentUser.value?.role ?? null);
   const userProfile = computed(() => currentUser.value?.user_profile ?? null);
 
+  // Computed property to get the user's role as a Role enum, handling string to enum conversion
+  const userRoleTyped = computed<Role | null>(() => {
+    const roleString = currentUser.value?.role; // Get the role string from the user object
+    if (roleString && Object.values(Role).includes(roleString as Role)) {
+      return roleString as Role; // Cast and return if it matches a Role enum value
+    }
+    return null; // Return null if role is not set or doesn't match a known Role
+  });
+
   return {
     token,
     currentUser,
@@ -305,6 +314,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     userRole,
     userProfile,
+    userRoleTyped,
     loadAuthFromStorage,
     login,
     logout,

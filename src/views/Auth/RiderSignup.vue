@@ -144,7 +144,7 @@
                <div class="flex flex-col items-center max-w-xs">
                   <!-- Replace image with styled text -->
                   <h1 class="mb-4 text-4xl font-bold text-white">
-                    GasoPay
+                    <img src="/src/assets/images/GASOPAY-logo (2).svg" alt="gasopay-logo">
                   </h1>
                  <p class="text-center text-gray-400 dark:text-white/60">
                    Join our network of efficient delivery riders.

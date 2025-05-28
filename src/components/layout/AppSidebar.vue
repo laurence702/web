@@ -21,7 +21,7 @@
     >
       <router-link to="/">
        <h1 class="text-2xl font-bold">
-        GASOPAY
+        <img src="/src/assets/images/GASOPAY-logo (2).svg" alt="gasopay-logo" height="10px">
        </h1>
       </router-link>
     </div>
@@ -387,12 +387,10 @@ const filteredMenuGroups = computed(() => {
   }
 
   return allMenuGroups
-    // @ts-ignore
-    .filter(group => currentRole && group.allowedRoles && (group.allowedRoles.map(role => role as string).includes(currentRole as string)))
+    .filter(group => group.allowedRoles?.includes(currentRole))
     .map(group => ({
       ...group,
-      // @ts-ignore
-      items: group.items.filter(item => currentRole && item.allowedRoles && (item.allowedRoles.map(role => role as string).includes(currentRole as string)))
+      items: group.items.filter(item => item.allowedRoles?.includes(currentRole))
     }))
     .filter(group => group.items.length > 0);
 });

@@ -163,9 +163,7 @@
           <div class="flex items-center justify-center z-1">
             <common-grid-shape />
             <div class="flex flex-col items-center max-w-xs">
-              <h1 class="mb-4 text-4xl font-bold text-white">
-                GasoPay
-              </h1>
+              <img src="/src/assets/images/GASOPAY-logo (2).svg" alt="gasopay-logo">
               <p class="text-center text-gray-400 dark:text-white/60">
                 Fueling Your Journey, Seamlessly.
               </p>

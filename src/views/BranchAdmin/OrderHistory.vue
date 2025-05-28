@@ -305,12 +305,12 @@ const filters = reactive({
   status: '',
   startDate: '',
   endDate: '',
-  applied: false 
+  applied: false
 });
 
 const fetchOrders = async (page = 1) => {
-  isLoading.value = true;
-  error.value = null;
+    isLoading.value = true;
+    error.value = null;
   // Initialize pagination to a default state to prevent undefined access before fetch
   pagination.value = { current_page: 1, from: 0, to: 0, total: 0, last_page: 1 }; 
   try {
@@ -330,14 +330,14 @@ const fetchOrders = async (page = 1) => {
         error.value = 'Authentication token not found. Please log in again.';
         isLoading.value = false;
         return;
-    }
+      }
 
     const response = await apiService.get<ApiResponse>(endpoint, currentToken);
     
-    orders.value = response.data;
+      orders.value = response.data;
     pagination.value = response.meta;
-    totalOrders.value = response.meta.total;
-
+        totalOrders.value = response.meta.total;
+    
   } catch (err: unknown) {
     console.error('Error fetching orders:', err);
     if (err instanceof Error) {
@@ -352,7 +352,7 @@ const fetchOrders = async (page = 1) => {
 
 const applyFilters = () => {
   filters.applied = true;
-  fetchOrders(1); 
+  fetchOrders(1);
 };
 
 const resetFilters = () => {
@@ -361,7 +361,7 @@ const resetFilters = () => {
   filters.startDate = '';
   filters.endDate = '';
   filters.applied = false;
-  fetchOrders(1); 
+  fetchOrders(1);
 };
 
 onMounted(() => {

@@ -345,7 +345,6 @@ router.beforeEach(async (to, from, next) => {
     if (!authStore.token || !authStore.currentUser) {
       console.log(`[Guard] Redirecting to login, requiresAuth=true, token exists=${!!authStore.token}, user exists=${!!authStore.currentUser}`);
       next('/signin');
-      //@ts-expect-error
     } else if (allowedRoles && (!currentRole || !allowedRoles.includes(currentRole))) {
       console.log(`Redirecting to dashboard, user role '${currentRole}' not in allowedRoles:`, allowedRoles);
       next('/');
@@ -354,8 +353,7 @@ router.beforeEach(async (to, from, next) => {
     }
   } else if (authStore.isAuthenticated && publicPages.includes(to.path)) {
     console.log('Redirecting to dashboard, isAuthenticated=true, path is public auth page')
-    // Explicitly compare string values to bypass potential compiler issue with enum types
-    next((currentRole !== null && (currentRole as string === Role.RIDER as string || currentRole as string === Role.SUPER_ADMIN as string)) ? '/rider/profile' : '/')
+    next(currentRole === (Role.RIDER || Role.SUPER_ADMIN) ? '/rider/profile' : '/')
   } else {
     console.log('Allowing navigation to public route.')
     next()

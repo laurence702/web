@@ -126,6 +126,22 @@ export interface GetUserByIdResponse { // New interface
   user: ApiUser;
 }
 
+// Define interface for backend validation errors
+export interface BackendValidationErrorResponse {
+  message: string;
+  errors?: Record<string, string[]>; // Common format: field name -> array of error messages
+}
+
+// Type guard for BackendValidationErrorResponse
+export function isBackendValidationErrorResponse(data: unknown): data is BackendValidationErrorResponse {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'message' in data && typeof data.message === 'string' &&
+    'errors' in data && typeof data.errors === 'object' // Further checks on errors object can be added if needed
+  );
+}
+
 // Define the structure for user list API response (adjust based on actual API)
 interface GetUsersResponse {
   data: ApiUser[];

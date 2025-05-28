@@ -355,7 +355,7 @@ router.beforeEach(async (to, from, next) => {
     if (!authStore.token || !authStore.currentUser) {
       console.log(`[Guard] Redirecting to login, requiresAuth=true, token exists=${!!authStore.token}, user exists=${!!authStore.currentUser}`);
       next('/signin');
-    } else if (allowedRoles && (!currentRole || !allowedRoles.includes(currentRole))) {
+    } else if (allowedRoles && (!currentRole || !allowedRoles.includes(currentRole as Role))) {
       console.log(`Redirecting to dashboard, user role '${currentRole}' not in allowedRoles:`, allowedRoles);
       next('/');
     } else {

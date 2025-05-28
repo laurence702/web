@@ -73,12 +73,12 @@
              <!-- Profile Picture -->
              <div>
                         <label for="profile-picture" class="form-label">Profile Picture</label>
-                        <input
-                           type="file"
+              <input
+                  type="file"
                            id="profile-picture"
                            @change="handleProfilePicUpload"
-                           accept="image/*"
-                           class="form-file-input"
+                  accept="image/*"
+                  class="form-file-input"
                            :disabled="isLoading || uploadingProfilePic"
                          />
                          <!-- Upload Status/Error Display -->
@@ -122,14 +122,14 @@
                    <input type="text" id="guarantors_address" v-model="formData.guarantors_address" required
                           class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
                      <p v-if="formErrors.guarantors_address" class="mt-1 text-sm text-error-500">{{ formErrors.guarantors_address }}</p>
-                 </div>
+            </div>
                 <!-- Address -->
                  <div>
                    <label for="address" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Rider's Address</label>
                    <input type="text" id="address" v-model="formData.address" required
                           class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent bg-none px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800" />
                      <p v-if="formErrors.address" class="mt-1 text-sm text-error-500">{{ formErrors.address }}</p>
-                 </div>
+          </div>
           </div>
         </section>
 

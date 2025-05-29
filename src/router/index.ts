@@ -248,11 +248,6 @@ const router = createRouter({
           },
         },
         {
-          path: '/home',
-          name: 'LandingPage',
-          component: () => import('../views/LandingPage.vue'),
-        },
-        {
           path: '/branch-admin/orders',
           name: 'BranchAdminOrderHistory',
           component: () => import('../views/BranchAdmin/OrderHistory.vue'),

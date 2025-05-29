@@ -65,11 +65,11 @@
                 </p>
               </div>
               
-              <div v-if="rider.balance == 0" class="flex flex-col w-full space-y-2">
+              <div v-if="showBuyProductButton" class="flex flex-col w-full space-y-2">
                 <button
                   @click="openNewOrderModal"
                   class="flex justify-center items-center px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-opacity-50"
-                  :disabled="Number(rider.balance) > 0"
+                  :disabled="!showBuyProductButton"
                 >
                   <ShoppingCartIcon class="h-5 w-5 mr-2" />
                   Buy Product
@@ -399,16 +399,17 @@
                 <tbody class="bg-white dark:bg-transparent divide-y divide-gray-200 dark:divide-gray-700">
                   <tr v-for="payment in paymentHistory" :key="payment.id" class="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {{ payment.product }}
+                      {{ payment.order_product_type.toUpperCase() }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      ₦{{ formatAmount(payment.amount) }}
+                      ₦{{ formatAmount(payment.transaction_amount) }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                       <span 
                         class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full" 
                         :class="{
                           'bg-success-100 text-success-800 dark:bg-success-900/30 dark:text-success-500': payment.status === 'completed',
+                          'bg-info-100 text-success-800 dark:bg-success-900/30 dark:text-success-500': payment.status === 'paid',
                           'bg-warning-100 text-warning-800 dark:bg-warning-900/30 dark:text-warning-500': payment.status === 'pending',
                           'bg-error-100 text-error-800 dark:bg-error-900/30 dark:text-error-500': payment.status === 'failed'
                         }"
@@ -441,9 +442,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, h } from 'vue';
+import { ref, onMounted, h, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
+import { useAuthStore, Role } from '@/stores/auth';
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue';
 import BaseCard from '@/components/common/BaseCard.vue';
 import Modal from '@/components/ui/Modal.vue';
@@ -466,7 +467,6 @@ import {
 import apiService from '@/services/apiService';
 import { generateAmountOptions, generatePartialPaymentOptions } from '@/services/productRules';
 
-// Define component name
 defineOptions({
   name: 'BranchAdminRiderProfileView'
 });
@@ -560,7 +560,7 @@ onMounted(async () => {
       data: Rider;
     }
     
-    const response = await apiService.get<RiderResponse>(`/api/users/${riderId}`, token);
+    const response = await apiService.get<RiderResponse>(`/users/${riderId}`, token);
     
     if (response && response.data) {
       rider.value = response.data;
@@ -742,15 +742,25 @@ async function createOrder() {
     
     console.log('orderData', orderData);
     // Make API call to create order
-    await apiService.post('/api/branch-admin/orders', orderData, token);
-    
-    // Show success message
-    alertInfo.value = {
+    try {
+     await apiService.post('/branch-admin/orders', orderData, token);
+     alertInfo.value = {
       show: true,
       type: 'success',
       title: 'Order Created',
       message: `Order for ${orderForm.value.product} has been created successfully.`
     };
+    } catch (error) {
+      alertInfo.value = {
+      show: true,
+      type: 'error',
+      title: 'Failed to create',
+      message: `Order for ${orderForm.value.product} was not successful: ${error instanceof Error ? error.message : 'Unknown error'}`
+    };
+    }
+    
+    // Show success message
+   
     
     // Close modal
     closeOrderModal();
@@ -762,8 +772,7 @@ async function createOrder() {
     
   } catch (err: unknown) {
     console.error('Error creating order:', err);
-    
-    // Show error message
+  
     alertInfo.value = {
       show: true,
       type: 'error',
@@ -813,7 +822,7 @@ async function fetchPaymentHistory() {
     
     // Make real API call to fetch payment history
     const response = await apiService.get<{ data: Payment[] }>(
-      `/api/payment-histories?rider_id=${rider.value.id}`, 
+      `/payment-histories?rider_id=${rider.value.id}`, 
       token
     );
     
@@ -844,6 +853,26 @@ function goToOrderHistoryForRider() {
     query: { rider_id: rider.value.id }
   });
 }
+
+const showBuyProductButton = computed(() => {
+  // Conditions for showing the "Buy Product" button:
+  // 1. Current user role is admin
+  // 2. The rider isn't banned
+  // 3. The rider verification_status is "verified"
+  // 4. Rider has a balance of 0
+  const currentUserRole = authStore.userRoleTyped;
+  console.log('User role is: ',currentUserRole);
+  const riderIsVerified = rider.value.verification_status === 'verified';
+  const riderIsNotBanned = rider.value.banned_at === undefined || rider.value.banned_at === null;
+  const riderBalanceIsZero = rider.value.balance === 0;
+
+  return (
+    currentUserRole === Role.ADMIN &&
+    riderIsNotBanned &&
+    riderIsVerified &&
+    riderBalanceIsZero
+  );
+});
 
 function goBack() {
   router.go(-1);

@@ -100,9 +100,10 @@
                 >
                   <span
                     :class="[
+                      'w-5 h-5',
                       isActive(item.path)
-                        ? 'menu-item-icon-active'
-                        : 'menu-item-icon-inactive',
+                        ? 'text-brand-500 dark:text-brand-400'
+                        : 'text-gray-500 dark:text-gray-400 group-hover:text-brand-500 dark:group-hover:text-brand-400',
                     ]"
                   >
                     <component :is="item.icon" />
@@ -182,23 +183,26 @@ import { computed } from 'vue';
 import { useAuthStore, Role } from '@/stores/auth';
 
 import {
-  GridIcon,
-  DocsIcon,
-  PieChartIcon,
   ChevronDownIcon,
   HorizontalDots,
-  TableIcon,
-  ListIcon,
 } from "../../icons";
 import SidebarWidget from "./SidebarWidget.vue";
-import BoxCubeIcon from "@/icons/BoxCubeIcon.vue";
 import { useSidebar } from "@/composables/useSidebar";
 import {
-  ClipboardDocumentListIcon,
   UserPlusIcon,
   UsersIcon,
   UserCircleIcon as SolidUserCircleIcon,
-  QrCodeIcon
+  QrCodeIcon,
+  ReceiptPercentIcon,
+  HomeIcon,
+  TruckIcon,
+  ClipboardDocumentCheckIcon,
+  Cog6ToothIcon,
+  BuildingOfficeIcon,
+  ChartPieIcon,
+  CurrencyDollarIcon,
+  CubeIcon,
+  DocumentChartBarIcon,
 } from "@heroicons/vue/24/solid";
 
 interface SubMenuItem {
@@ -232,13 +236,13 @@ const allMenuGroups: MenuGroup[] = [
     allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN],
     items: [
       {
-        icon: GridIcon,
+        icon: HomeIcon,
         name: "Dashboard",
         path: "/",
         allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN],
       },
       {
-        icon: UsersIcon,
+        icon: TruckIcon,
         name: "Riders",
         path: "/admin/riders",
         allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN],
@@ -251,43 +255,43 @@ const allMenuGroups: MenuGroup[] = [
     allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN],
     items: [
       {
-        icon: DocsIcon,
+        icon: ClipboardDocumentCheckIcon,
         name: "Registration Approval",
         path: "/admin/registration-approval",
         allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN],
       },
       {
-        icon: SolidUserCircleIcon,
+        icon: Cog6ToothIcon,
         name: "Admin Management",
-        path: "/super-admin/admins",
+        path: "/admin/admins",
         allowedRoles: [Role.SUPER_ADMIN],
       },
       {
-        icon: PieChartIcon,
+        icon: BuildingOfficeIcon,
         name: "Branch Overview",
         path: "/super-admin/branches",
         allowedRoles: [Role.SUPER_ADMIN],
       },
       {
-        icon: PieChartIcon,
+        icon: ChartPieIcon,
         name: "System Analytics",
         path: "/super-admin/analytics",
         allowedRoles: [Role.SUPER_ADMIN],
       },
       {
-        icon: ListIcon,
+        icon: CurrencyDollarIcon,
         name: "Global Transactions",
         path: "/super-admin/transactions",
         allowedRoles: [Role.SUPER_ADMIN],
       },
       {
-        icon: BoxCubeIcon,
+        icon: CubeIcon,
         name: "Product Management",
         path: "/admin/products",
         allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN],
       },
       {
-        icon: TableIcon,
+        icon: DocumentChartBarIcon,
         name: "Stats & Reports",
         path: "/super-admin/stats-reports",
         allowedRoles: [Role.SUPER_ADMIN],
@@ -305,7 +309,7 @@ const allMenuGroups: MenuGroup[] = [
         allowedRoles: [Role.RIDER],
       },
       {
-        icon: ClipboardDocumentListIcon,
+        icon: ReceiptPercentIcon,
         name: "Order History",
         path: "/admin/orders",
         allowedRoles: [Role.RIDER, Role.ADMIN, Role.SUPER_ADMIN],
@@ -317,7 +321,7 @@ const allMenuGroups: MenuGroup[] = [
     allowedRoles: [Role.ADMIN, Role.SUPER_ADMIN],
     items: [
       {
-        icon: ClipboardDocumentListIcon,
+        icon: ReceiptPercentIcon,
         name: "Order History",
         path: "/admin/orders",
         allowedRoles: [Role.RIDER, Role.ADMIN, Role.SUPER_ADMIN],
@@ -341,7 +345,7 @@ const allMenuGroups: MenuGroup[] = [
     allowedRoles: [Role.ADMIN],
     items: [
       {
-        icon: GridIcon,
+        icon: HomeIcon,
         name: "Branch Dashboard",
         path: "/branch-admin",
         allowedRoles: [Role.ADMIN],
@@ -353,7 +357,7 @@ const allMenuGroups: MenuGroup[] = [
         allowedRoles: [Role.ADMIN],
       },
       {
-        icon: ClipboardDocumentListIcon,
+        icon: ReceiptPercentIcon,
         name: "Order History",
         path: "/branch-admin/orders",
         allowedRoles: [Role.ADMIN],

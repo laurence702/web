@@ -72,29 +72,37 @@
              </div>
              <!-- Profile Picture -->
              <div>
-                        <label for="profile-picture" class="form-label">Profile Picture</label>
-              <input
-                  type="file"
-                           id="profile-picture"
-                           @change="handleProfilePicUpload"
-                  accept="image/*"
-                  class="form-file-input"
-                           :disabled="isLoading || uploadingProfilePic"
-                         />
-                         <!-- Upload Status/Error Display -->
-                         <div v-if="uploadingProfilePic" class="mt-2 text-sm text-blue-600 dark:text-blue-400">
-                             Uploading picture...
-                         </div>
-                         <div v-if="uploadError" class="mt-2 text-sm text-red-600 dark:text-red-400">
-                             {{ uploadError }}
-                         </div>
-                         <div v-if="formData.profilePicUrl && !uploadingProfilePic && !uploadError" class="mt-2 text-sm text-green-600 dark:text-green-400">
-                              ✅ Picture uploaded successfully!
-                         </div>
-                         <p v-else-if="!formData.profilePicUrl && !uploadingProfilePic" class="text-xs text-gray-500 mt-1">
-                             Upload a clear picture (JPG, PNG). Max 2MB.
-                         </p>
-                       </div>
+                <label for="profile-picture" class="form-label mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Profile Picture</label>
+                <input
+                    type="file"
+                    ref="profilePictureInput"
+                    @change="handleProfilePicUpload"
+                    accept="image/*"
+                    class="hidden"
+                    :disabled="isLoading || uploadingProfilePic"
+                  />
+                <button
+                  type="button"
+                  @click="triggerFileInput"
+                  class="px-4 py-2 bg-brand-500 text-white rounded-lg text-sm font-medium hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  :disabled="isLoading || uploadingProfilePic"
+                >
+                  {{ uploadingProfilePic ? 'Uploading...' : formData.profilePicUrl ? 'Change Picture' : 'Upload Picture' }}
+                </button>
+                            <!-- Upload Status/Error Display -->
+                            <div v-if="uploadingProfilePic" class="mt-2 text-sm text-blue-600 dark:text-blue-400">
+                                Uploading picture...
+                            </div>
+                            <div v-if="uploadError" class="mt-2 text-sm text-error-500">
+                                {{ uploadError }}
+                            </div>
+                            <div v-if="formData.profile_pic_url && !uploadingProfilePic && !uploadError" class="mt-2 text-sm text-success-500">
+                                 ✅ Picture uploaded successfully!
+                            </div>
+                            <p v-else-if="!formData.profile_pic_url && !uploadingProfilePic && !uploadError" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                Upload a clear picture (JPG, PNG). Max 2MB.
+                            </p>
+                          </div>
            </div>
         </section>
 
@@ -193,6 +201,11 @@ const formErrors = ref<Record<string, string>>({});
 const isLoading = ref(false);
 const errorMessage = ref<string | null>(null);
 const successMessage = ref<string | null>(null);
+
+const profilePictureInput = ref<HTMLInputElement | null>(null);
+const triggerFileInput = () => {
+  profilePictureInput.value?.click();
+};
 
 const uploadingProfilePic = ref(false);
 const uploadError = ref<string | null>(null);

@@ -34,17 +34,21 @@
               Streamline your fuel management with Gasopay. We offer seamless payments and delivery for LPG, CNG, and petroleum products.
             </p>
             <div class="mt-8 flex space-x-4">
-              <button class="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-medium hover:bg-blue-700">
-                Get Started
-              </button>
-              <button class="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg text-lg font-medium hover:bg-gray-50">
-                Learn More
-              </button>
+                <router-link to="/signup">
+                    <button class="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-medium hover:bg-blue-700">
+                         Sign Up
+                    </button>
+                </router-link>
+                <router-link to="/signin">
+                    <button class="border border-gray-300 text-gray-700 px-8 py-3 rounded-lg text-lg font-medium hover:bg-gray-50">
+                        Sign In
+                    </button>
+                </router-link>
             </div>
           </div>
           <div class="relative h-96">
             <img 
-              src="https://images.pexels.com/photos/2244746/pexels-photo-2244746.jpeg"
+              src="/src/assets/images/lpg-truck.png"
               alt="Modern gas station"
               class="absolute inset-0 w-full h-full object-cover rounded-2xl shadow-xl"
             />
@@ -63,7 +67,7 @@
         <div class="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div class="bg-white p-8 rounded-xl shadow-sm">
             <Wallet class="h-12 w-12 text-blue-600" />
-            <h3 class="mt-6 text-xl font-semibold text-gray-900">Secure Payments</h3>
+            <h3 class="mt-6 text-xl font-semibold text-gray-900">Quick Payments</h3>
             <p class="mt-4 text-gray-600">Safe and seamless transactions for all your fuel purchases</p>
           </div>
           <div class="bg-white p-8 rounded-xl shadow-sm">
@@ -74,7 +78,7 @@
           <div class="bg-white p-8 rounded-xl shadow-sm">
             <LineChart class="h-12 w-12 text-blue-600" />
             <h3 class="mt-6 text-xl font-semibold text-gray-900">Usage Analytics</h3>
-            <p class="mt-4 text-gray-600">Track and optimize your fuel consumption</p>
+            <p class="mt-4 text-gray-600">Track and optimize your consumption</p>
           </div>
         </div>
       </div>
@@ -87,40 +91,40 @@
         <div class="mt-20 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div class="relative group">
             <img 
-              src="https://images.pexels.com/photos/9796405/pexels-photo-9796405.jpeg"
+              src="/src/assets/images/lpg-truck.png"
               alt="LPG cylinders"
               class="w-full h-64 object-cover rounded-xl"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl">
               <div class="absolute bottom-6 left-6">
                 <h3 class="text-xl font-semibold text-white">LPG</h3>
-                <p class="text-gray-200 mt-2">Clean and efficient cooking gas</p>
+                <!-- <p class="text-gray-200 mt-2">Clean and efficient cooking gas</p> -->
               </div>
             </div>
           </div>
           <div class="relative group">
             <img 
-              src="https://images.pexels.com/photos/9799757/pexels-photo-9799757.jpeg"
+              src="/src/assets/images/CNG-keke.webp"
               alt="CNG station"
               class="w-full h-64 object-cover rounded-xl"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl">
               <div class="absolute bottom-6 left-6">
                 <h3 class="text-xl font-semibold text-white">CNG</h3>
-                <p class="text-gray-200 mt-2">Eco-friendly vehicle fuel</p>
+                <!-- <p class="text-gray-200 mt-2">Eco-friendly vehicle fuel</p> -->
               </div>
             </div>
           </div>
           <div class="relative group">
             <img 
-              src="https://images.pexels.com/photos/1537172/pexels-photo-1537172.jpeg"
+              src="/src/assets/images/Fuel-pump-860x519.jpg"
               alt="Petroleum station"
               class="w-full h-64 object-cover rounded-xl"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl">
               <div class="absolute bottom-6 left-6">
                 <h3 class="text-xl font-semibold text-white">Petroleum</h3>
-                <p class="text-gray-200 mt-2">High-quality fuel products</p>
+                <!-- <p class="text-gray-200 mt-2">High-quality fuel products</p> -->
               </div>
             </div>
           </div>
@@ -138,7 +142,7 @@
             <div class="mt-8 space-y-6">
               <div class="flex items-center">
                 <MapPin class="h-6 w-6 text-blue-600" />
-                <span class="ml-4 text-gray-600">123 Business Avenue, City, Country</span>
+                <span class="ml-4 text-gray-600">123 Uromi street, Benin City, Edo State</span>
               </div>
               <div class="flex items-center">
                 <Phone class="h-6 w-6 text-blue-600" />
@@ -177,8 +181,10 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div class="flex items-center">
-              <Fuel class="h-8 w-8 text-blue-400" />
-              <span class="ml-2 text-2xl font-bold">Gasopay</span>
+                <img src="/src/assets/images/GASOPAY-logo-fn.svg" alt="site-logo">
+              <span class="ml-2 text-2xl font-bold">
+                <!-- <img src="/src/assets/images/GASOPAY-logo-fn.svg" alt="site-logo"> -->
+              </span>
             </div>
             <p class="mt-4 text-gray-400">Your trusted partner for smart fuel solutions</p>
           </div>

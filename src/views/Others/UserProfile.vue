@@ -71,7 +71,7 @@ onMounted(async () => {
     if (authStore.currentUser?.branch_id && authStore.token) {
       const branchId = authStore.currentUser.branch_id
       
-      const response = await apiService.get<{data: BranchData}>(`/api/branches/${branchId}`, authStore.token)
+      const response = await apiService.get<{data: BranchData}>(`/branches/${branchId}`, authStore.token)
       branchData.value = response.data
     }
   } catch (error) {

@@ -323,7 +323,7 @@ const fetchOrders = async (page = 1) => {
     if (filters.startDate) queryParams.append('start_date', filters.startDate);
     if (filters.endDate) queryParams.append('end_date', filters.endDate);
 
-    const endpoint = `/branch-admin/orders/order-history?${queryParams.toString()}`;
+    const endpoint = `/branch-admin/orders/history?${queryParams.toString()}`;
     
     const currentToken = authStore.token;
     if (!currentToken) {

@@ -156,7 +156,7 @@ const router = createRouter({
         {
           path: '/admin/orders',
           name: 'OrderHistory',
-          component: () => import('../views/Admin/OrderHistory.vue'),
+          component: () => import('../views/BranchAdmin/OrderHistory.vue'),
           meta: {
             title: 'Order History',
             requiresAuth: true,

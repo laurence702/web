@@ -21,7 +21,7 @@
     >
       <router-link to="/">
        <h1 class="text-2xl font-bold">
-        <img src="/src/assets/images/GASOPAY-logo (2).svg" alt="gasopay-logo" height="10px">
+        <img src="/src/assets/images/main_logo.svg" alt="gasopay-logo" height="10px">
        </h1>
       </router-link>
     </div>

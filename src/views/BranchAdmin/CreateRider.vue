@@ -368,56 +368,43 @@ const handleSubmit = async () => {
 
     resetForm();
 
-  } catch (error) {
-    console.error('Rider registration failed:', error);
-    
-    if (axios.isAxiosError(error) && error.response) {
-      const errorResponse = error.response;
-      
-      if (errorResponse.data && typeof errorResponse.data === 'object' && isBackendValidationErrorResponse(errorResponse.data)) {
-         const validationError = errorResponse.data;
-         if (validationError.errors) {
-           for (const field in validationError.errors) {
-             if (validationError.errors[field] && validationError.errors[field].length > 0) {
-               if (field in formData.value) {
-                  formErrors.value[field as keyof typeof formData.value] = validationError.errors[field].join(', ');
-               } else {
-                 console.warn(`Backend returned error for unknown field: ${field}`);
-                 errorMessage.value = (errorMessage.value ? errorMessage.value + '; ' : '') + `${field}: ${validationError.errors[field].join(', ')}`;
-               }
-             }
-           }
-           if (validationError.message && Object.keys(formErrors.value).length === 0) {
-                errorMessage.value = validationError.message;
-            } else if (!validationError.message && Object.keys(formErrors.value).length > 0) {
-               errorMessage.value = 'Validation failed. Please check the fields above.';
+  } catch (error: unknown) {
+    console.error("Registration failed:", error);
+    if (isAxiosError(error) && error.response) {
+      const errorData = error.response.data;
+      if (isBackendValidationErrorResponse(errorData)) {
+        // Handle validation errors
+        if (errorData.errors) {
+          Object.keys(errorData.errors).forEach((field) => {
+            const messages = errorData.errors[field];
+            if (Array.isArray(messages)) {
+              formErrors.value[field as keyof typeof formErrors.value] = messages.join(', ');
+            } else if (typeof messages === 'string') {
+              formErrors.value[field as keyof typeof formErrors.value] = messages;
             }
-         }
-          if (Object.keys(formErrors.value).length > 0) {
-            if(Object.keys(formErrors.value).some(key => ['fullname', 'email', 'phone', 'password', 'password_confirmation'].includes(key as string))) {
-                currentStep.value = 1;
-            } else if (Object.keys(formErrors.value).some(key => ['nin', 'vehicle_type', 'profilePicUrl'].includes(key as string))) {
-                currentStep.value = 2;
-            } else if(Object.keys(formErrors.value).some(key => ['guarantors_name', 'guarantors_phone', 'guarantors_address', 'address'].includes(key as string))) {
-                 currentStep.value = 3;
-             } else {
-                  currentStep.value = 1;
-             }
-          } else {
-               errorMessage.value = validationError.message || 'An unexpected validation error occurred without specific field errors.';
-          }
-      } else if (errorResponse.data && typeof errorResponse.data.message === 'string'){
-           errorMessage.value = errorResponse.data.message;
-      }
-      else {
-         errorMessage.value = 'An unexpected error occurred with the response data format.';
+          });
+        }
+
+        // Navigate back to the step with errors
+        if (formErrors.value.fullname || formErrors.value.email || formErrors.value.phone || formErrors.value.password || formErrors.value.confirm_password || formErrors.value.role || formErrors.value.branch_id) {
+          currentStep.value = 1;
+        } else if (formErrors.value.address || formErrors.value.city || formErrors.value.state || formErrors.value.country || formErrors.value.postal_code) {
+          currentStep.value = 2;
+        }
+      } else if (typeof errorData === 'object' && errorData !== null && 'message' in errorData && typeof errorData.message === 'string') {
+         // Handle other API errors with a message property
+        errorMessage.value = errorData.message;
+      } else {
+        // Handle unexpected API response format
+        errorMessage.value = 'An unexpected error occurred during registration.';
       }
     } else if (error instanceof Error) {
-       errorMessage.value = error.message;
+      // Handle generic JavaScript errors
+      errorMessage.value = error.message;
     } else {
-       errorMessage.value = 'An unknown error occurred.';
+      // Handle unknown error types
+      errorMessage.value = 'An unknown error occurred.';
     }
-  } finally {
     isLoading.value = false;
   }
 };

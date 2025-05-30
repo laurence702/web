@@ -270,7 +270,7 @@ onMounted(async () => {
     // In a real app, we'd get this from the user's profile or the API
     const branchId = authStore.currentUser?.branch_id || 1;
     
-    const response = await apiService.get<BranchResponse>(`/api/branches/${branchId}`, token);
+    const response = await apiService.get<BranchResponse>(`/branches/${branchId}`, token);
     
     // Extract the branch data from the response
     branchData.value = response.data;

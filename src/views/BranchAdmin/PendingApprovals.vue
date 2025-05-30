@@ -255,7 +255,7 @@ async function handleApproval(proofId: string, status: 'approved' | 'rejected') 
     }
 
     // Replace with actual API call
-    await apiService.post(`/api/payment-proofs/${proofId}/${status}`, {}, token);
+    await apiService.post(`/payment-proofs/${proofId}/${status}`, {}, token);
     // await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API delay if apiService is not used initially
     
     item.statusMessage = `Payment proof has been successfully ${status}.`;

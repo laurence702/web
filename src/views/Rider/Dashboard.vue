@@ -170,7 +170,7 @@ async function fetchRiderStats() {
       throw new Error('User not authenticated or user data missing.');
     }
     // const riderId = authStore.currentUser.id;
-    // const response = await apiService.get<RiderStats>(`/api/riders/${riderId}/stats`, token);
+    // const response = await apiService.get<RiderStats>(`/riders/${riderId}/stats`, token);
     // riderStats.value = response.data;
 
     // MOCK DATA 

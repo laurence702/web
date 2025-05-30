@@ -399,10 +399,10 @@
                 <tbody class="bg-white dark:bg-transparent divide-y divide-gray-200 dark:divide-gray-700">
                   <tr v-for="payment in paymentHistory" :key="payment.id" class="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {{ payment.order_product_type.toUpperCase() }}
+                      {{ payment.product.toUpperCase() }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      ₦{{ formatAmount(payment.transaction_amount) }}
+                      ₦{{ formatAmount(payment.amount) }}
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                       <span 

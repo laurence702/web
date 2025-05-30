@@ -96,10 +96,10 @@
                             <div v-if="uploadError" class="mt-2 text-sm text-error-500">
                                 {{ uploadError }}
                             </div>
-                            <div v-if="formData.profile_pic_url && !uploadingProfilePic && !uploadError" class="mt-2 text-sm text-success-500">
+                            <div v-if="formData.profilePicUrl && !uploadingProfilePic && !uploadError" class="mt-2 text-sm text-success-500">
                                  ✅ Picture uploaded successfully!
                             </div>
-                            <p v-else-if="!formData.profile_pic_url && !uploadingProfilePic && !uploadError" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            <p v-else-if="!formData.profilePicUrl && !uploadingProfilePic && !uploadError" class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                 Upload a clear picture (JPG, PNG). Max 2MB.
                             </p>
                           </div>
@@ -357,8 +357,10 @@ const handleSubmit = async () => {
   data.append('role', 'rider');
 
   if (formData.value.profilePicUrl) {
-    data.append('profilePicUrl', formData.value.profilePicUrl);
+    data.append('profile_pic_url', formData.value.profilePicUrl);
   }
+
+  console.log('Submitting Rider Registration Data to Backend...');
 
   try {
     const response = await apiService.post<RiderRegistrationResponse, FormData>('/register-rider', data, token);
@@ -374,9 +376,10 @@ const handleSubmit = async () => {
       const errorData = error.response.data;
       if (isBackendValidationErrorResponse(errorData)) {
         // Handle validation errors
-        if (errorData.errors) {
-          Object.keys(errorData.errors).forEach((field) => {
-            const messages = errorData.errors[field];
+        if (errorData.errors) { 
+          const validationErrors = errorData.errors as Record<string, string[]>;
+          Object.keys(validationErrors).forEach((field) => {
+            const messages = validationErrors[field];
             if (Array.isArray(messages)) {
               formErrors.value[field as keyof typeof formErrors.value] = messages.join(', ');
             } else if (typeof messages === 'string') {

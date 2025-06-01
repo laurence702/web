@@ -85,7 +85,7 @@
              <div class="flex items-center justify-center z-1">
                <CommonGridShape />
                <div class="flex flex-col items-center max-w-xs">
-                <img src="/src/assets/images/GASOPAY-logo (2).svg" alt="gasopay-logo">
+                <img src="/src/assets/images/GASOPAY-orange.svg" alt="gasopay-logo">
                  <p class="text-center text-gray-400 dark:text-white/60">
                    Join us and start fueling your journey!
                  </p>

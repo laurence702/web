@@ -90,7 +90,7 @@ export interface ApiUser {
   phone: string;
   role: string;
   verification_status: string;
-  branch_id: number | null; // Keep ID if needed, but use branch object primarily
+  branch_id: string | null; // Keep ID if needed, but use branch object primarily
   branch?: BranchData | null; // Add the nested branch object, make it optional
   user_profile: UserProfileData | null;
   // Include other fields from example if needed (e.g., balance, banned_at)
@@ -160,6 +160,12 @@ interface GetUsersParams {
   verification_status?: string; // Add verification status filter
   branchId?: string; // Optional filter
   // Add other potential filter/sort params
+}
+
+// Define interface for the response when fetching a list of branches
+export interface GetBranchesResponse {
+  data: BranchData[];
+  // Add other pagination/meta fields if the API returns them
 }
 
 // Define request body for verification update
@@ -442,4 +448,135 @@ export async function updateRiderVerificationStatus(
     return data as UpdateVerificationStatusResponse;
 }
 
-// Add other API functions here as needed (e.g., registerUser, fetchUserData) 
+// Add other API functions here as needed (e.g., registerUser, fetchUserData)
+
+// Add a new function to fetch branches
+export async function getBranches(token: string): Promise<GetBranchesResponse> {
+  if (!token) {
+    throw new Error("Authentication token is missing.");
+  }
+
+  const url = `${BASE_URL}/branches`;
+  console.log('[apiService] Fetching branches from:', url);
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  let data;
+  try {
+      data = await response.json();
+  } catch {
+      throw new Error(`Failed to parse branches response. Status: ${response.status}`);
+  }
+
+  if (!response.ok) {
+    console.error("GetBranches API Error Response:", data);
+    throw new Error(data.message || `Failed to fetch branches. Status: ${response.status}`);
+  }
+
+  // Assuming the response directly contains { data: BranchData[] } or similar
+  return data as GetBranchesResponse;
+}
+
+// Add a new function to create an admin
+export async function createAdmin(
+  token: string,
+  payload: { fullname: string; email: string; phone: string; password: string; password_confirmation: string; branch_id: string; }
+): Promise<ApiUser> { // Assuming it returns the created admin user
+  if (!token) {
+    throw new Error("Authentication token is missing.");
+  }
+
+  const url = `${BASE_URL}/create-admin`;
+  console.log('[apiService] Creating admin at:', url);
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  let data;
+  try {
+      data = await response.json();
+  } catch {
+      throw new Error(`Failed to parse create admin response. Status: ${response.status}`);
+  }
+
+  if (!response.ok) {
+    console.error("CreateAdmin API Error Response:", data);
+     // Check if it's a validation error with the specific structure
+    if (data && typeof data === 'object' && 'errors' in data && typeof data.errors === 'object') {
+       // You might want to throw a specific validation error type here
+       throw new Error(data.message || 'Validation failed.');
+    } else {
+      throw new Error(data.message || `Failed to create admin. Status: ${response.status}`);
+    }
+  }
+
+  // Assuming successful response returns the created user object
+  return data as ApiUser; // Adjust if the response structure is different
+}
+
+// Add a new function to update a user (admin or other roles)
+export async function updateUser(
+  token: string,
+  userId: string,
+  payload: Partial<{ // Use Partial for optional fields
+    fullname: string;
+    email: string; // Email might be updatable
+    phone: string;
+    branch_id: string | null; // Allow assigning/unassigning branch
+    // Do NOT include password fields here unless the API handles them separately
+    // Do NOT include role or id as they are unlikely to be updatable this way
+  }>
+): Promise<ApiUser> { // Assuming it returns the updated user object
+  if (!token) {
+    throw new Error("Authentication token is missing.");
+  }
+  if (!userId) {
+    throw new Error("User ID is missing.");
+  }
+
+  const url = `${BASE_URL}/users/${userId}`;
+  console.log('[apiService] Updating user at:', url, 'with payload:', payload);
+
+  const response = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  let data;
+  try {
+      data = await response.json();
+  } catch {
+      throw new Error(`Failed to parse update user response. Status: ${response.status}`);
+  }
+
+  if (!response.ok) {
+    console.error("UpdateUser API Error Response:", data);
+     // Check if it's a validation error with the specific structure
+    if (data && typeof data === 'object' && 'errors' in data && typeof data.errors === 'object') {
+       throw new Error(data.message || 'Validation failed.');
+    } else {
+      throw new Error(data.message || `Failed to update user. Status: ${response.status}`);
+    }
+  }
+
+  // Assuming successful response returns the updated user object
+  return data as ApiUser; // Adjust if the response structure is different
+} 

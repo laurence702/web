@@ -5,7 +5,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
           <div class="flex items-center">
-            <img src="/src/assets/images/GASOPAY-logo (2).svg" alt="gasopay-logo" height="10px">
+            <img src="/src/assets/images/GASOPAY-orange.svg" alt="gasopay-logo" height="10px">
             <!-- <Fuel class="h-8 w-8 text-blue-600" />
             <span class="ml-2 text-2xl font-bold text-gray-900">Gasopay</span> -->
           </div>
@@ -181,9 +181,9 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div class="flex items-center">
-                <img src="/src/assets/images/GASOPAY-logo-fn.svg" alt="site-logo">
+                <img src="/src/assets/images/GASOPAY-orange.svg" alt="site-logo">
               <span class="ml-2 text-2xl font-bold">
-                <!-- <img src="/src/assets/images/GASOPAY-logo-fn.svg" alt="site-logo"> -->
+                <!-- <img src="/src/assets/images/main_logo.svg" alt="site-logo"> -->
               </span>
             </div>
             <p class="mt-4 text-gray-400">Your trusted partner for smart fuel solutions</p>

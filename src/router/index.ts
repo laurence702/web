@@ -311,7 +311,7 @@ const router = createRouter({
       meta: { title: 'Rider Signup' }
     },
     {
-      path: '/home',
+      path: '/landing',
       name: 'LandingPage',
       component: () => import('../views/LandingPage.vue'),
     },
